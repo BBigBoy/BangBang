@@ -1,0 +1,59 @@
+body, html {
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 100%;
+}
+#carousel-example-generic .item img {
+    display: block;
+    width: 100%;
+}
+
+.HolyGrail {
+    display: flex;
+    display: -webkit-flex; /* Safari */
+    min-height: 100vh;
+    flex-direction: column;
+    display: -webkit-box; /*Safari,Opera,Chrome*/
+    -webkit-box-orient: vertical; /*Safari,Opera,Chrome*/
+}
+
+header {
+    display: flex;
+    display: -webkit-flex; /* Safari */
+    display: -webkit-box; /*Safari,Opera,Chrome*/
+    flex: 0;
+    -webkit-flex: 0;
+    -webkit-box-flex: 0;
+}
+
+footer {
+    display: flex;
+    display: -webkit-flex; /* Safari */
+    display: -webkit-box; /*Safari,Opera,Chrome*/
+    flex: 1;
+    -webkit-flex: 1;
+    -webkit-box-flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    -webkit-box-pack: center; /*Safari,Opera,Chrome*/
+    -webkit-box-orient: vertical; /*Safari,Opera,Chrome*/
+}
+
+.HolyGrail-body {
+    display: flex;
+    display: -webkit-flex; /* Safari */
+    display: -webkit-box; /*Safari,Opera,Chrome*/
+    flex: 1;
+    -webkit-flex: 1;
+    -webkit-box-flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    -webkit-box-pack: center; /*Safari,Opera,Chrome*/
+    -webkit-box-orient: vertical; /*Safari,Opera,Chrome*/
+}
+
+.weui_btn {
+    margin: 10px 10% !important;
+}
