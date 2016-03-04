@@ -35,7 +35,7 @@ class IndexController extends Own_Controller_Base
      */
     public function getAction()
     {
-        $taskAtt = (new Bang_IndexModel())->getTasks();;
+        $taskAtt = (new Bang_TaskModel())->getTasks();;
         $this->assign("task_categorys", self::$TASK_CATEGORY);
         $this->assign("tasks", $taskAtt);
     }
@@ -65,7 +65,7 @@ class IndexController extends Own_Controller_Base
         $taskInfo['publish_user'] = 1;//$this->session('userId')
         $taskInfo['publish_user_openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';//$this->session('openid')
         $taskInfo['activity_id'] = 1;
-        $task = (new Bang_IndexModel())->findTask($taskInfo);
+        $task = (new Bang_TaskModel())->findTask($taskInfo);
         if ($task) {
             $this->assign('huochepiao_had_use', 'yes');
         }
@@ -95,9 +95,9 @@ class IndexController extends Own_Controller_Base
             $returnMsg['errCode'] = -2;
             $returnMsg['errMsg'] = 'Unauthorized Access!';
         } else {
-            $modle = new Bang_IndexModel();
+            $userModle = new Bang_UserModel();
             $userInfo['openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';// $this->session('openid');
-            $findUserInfo = $modle->findUser($userInfo);
+            $findUserInfo = $userModle->findUser($userInfo);
             if (!$findUserInfo) {
                 $userInfo['name'] = $this->getParam('post.name');
                 $userInfo['nick_name'] = $this->session('nickname');
@@ -105,7 +105,7 @@ class IndexController extends Own_Controller_Base
                 $userInfo['level'] = 0;
                 $userInfo['last_login_time'] = time();
                 $userInfo['join_time'] = time();
-                $userId = $modle->addUser($userInfo);
+                $userId = $userModle->addUser($userInfo);
                 if (!$userId) {
                     $returnMsg['errCode'] = -1;
                     $returnMsg['errMsg'] = 'System wrong1!';
@@ -119,7 +119,8 @@ class IndexController extends Own_Controller_Base
                 $taskInfo['publish_user'] = $this->session('userId');
                 $taskInfo['publish_user_openid'] = $this->session('openid');
                 $taskInfo['activity_id'] = 1;
-                $hadUse = $modle->findTask($taskInfo);
+                $taskModel=new Bang_TaskModel();
+                $hadUse = $taskModel->findTask($taskInfo);
                 if ($hadUse) {
                     $returnMsg['errCode'] = 2;
                     $returnMsg['errMsg'] = 'had used!';
@@ -135,7 +136,7 @@ class IndexController extends Own_Controller_Base
                     $taskInfo['loc_goal_city'] = '咸阳';
                     $taskInfo['loc_goal_district'] = '杨陵区';
                     $taskInfo['loc_goal_description'] = '火车站';
-                    $addState = $modle->addTask($taskInfo);
+                    $addState = $taskModel->addTask($taskInfo);
                     if (!$addState) {
                         $returnMsg['errCode'] = -1;
                         $returnMsg['errMsg'] = 'System wrong2!';
@@ -158,7 +159,7 @@ class IndexController extends Own_Controller_Base
      */
     public function huochepiaogetstraightAction()
     {
-        $modle = new Bang_IndexModel();
+        $modle = new Bang_TaskModel();
         $returnMsg['errCode'] = 0;
         $returnMsg['errMsg'] = 'ok';
         if (!$this->session('userId')) {
@@ -257,7 +258,7 @@ class IndexController extends Own_Controller_Base
                     $taskInfo['loc_start_description'] = $this->getParam('post.area_detail_start');
                 }
             }
-            $addState = (new Bang_IndexModel())->addTask($taskInfo);
+            $addState = (new Bang_TaskModel())->addTask($taskInfo);
             if (!$addState) {
                 $returnMsg['errCode'] = -1;
                 $returnMsg['errMsg'] = 'System wrong!';
@@ -293,9 +294,9 @@ class IndexController extends Own_Controller_Base
             $returnMsg['errCode'] = -2;
             $returnMsg['errMsg'] = 'Unauthorized Access!';
         } else {
-            $BangUserModel = new Bang_IndexModel();
+            $UserModel = new Bang_UserModel();
             $userInfo['openid'] = $this->session('openid');
-            $findUserInfo = $BangUserModel->findUser($userInfo);
+            $findUserInfo = $UserModel->findUser($userInfo);
             if ($findUserInfo) {
                 $returnMsg['errCode'] = 2;
                 $returnMsg['errMsg'] = 'This user is already exist!';
@@ -308,7 +309,7 @@ class IndexController extends Own_Controller_Base
                 $userInfo['level'] = 0;
                 $userInfo['last_login_time'] = time();
                 $userInfo['join_time'] = time();
-                $addState = $BangUserModel->addUser($userInfo);
+                $addState = $UserModel->addUser($userInfo);
                 if (!$addState) {
                     $returnMsg['errCode'] = -1;
                     $returnMsg['errMsg'] = 'System wrong!';

@@ -1,23 +1,12 @@
 <?php
-
 /**
- * @name IndexModel
- * @desc index数据获取类, 可以访问数据库，文件，其它系统等
- * @author root
+ * Created by PhpStorm.
+ * User: root
+ * Date: 16-3-4
+ * Time: 上午11:14
  */
-class Bang_IndexModel
+class Bang_TaskModel
 {
-    /*   public $tableSql = <<<DB
-   CREATE TABLE IF NOT EXISTS `bigbigboy` (
-     `device_id` int(11) NOT NULL,
-     `major` int(11) NOT NULL,
-     `minor` int(11) NOT NULL,
-     `device_sn` char(30) DEFAULT NULL,
-     `visit_num` int(11) DEFAULT '0',
-     `live_num` int(11) DEFAULT '0',
-     PRIMARY KEY (`device_id`)
-   ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-   DB;*/
     /**
      * @return array
      */
@@ -43,18 +32,5 @@ class Bang_IndexModel
         $taskDb = new Db_Mysql();
         return $taskDb->insert('think_bangbang_task', $taskInfo);
     }
-
-    function findUser($findInfo)
-    {
-        $taskDb = new Db_Mysql();
-        return $taskDb->get_row('think_bangbang_user', $findInfo);
-    }
-
-    function addUser($userInfo)
-    {
-        $taskDb = new Db_Mysql();
-        return $taskDb->insert('think_bangbang_user', $userInfo);
-    }
-
 
 }
