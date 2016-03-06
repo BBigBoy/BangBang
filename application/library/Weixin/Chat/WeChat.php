@@ -1,10 +1,5 @@
 <?php
-namespace Platform\Common\WXChat;
-
-use Platform\Common\WXCrypt\WXBizMsgCrypt;
-use Platform\Common\WXCrypt\XMLParse;
-
-class WeChat
+class Weixin_Chat_WeChat
 {
     const MSGTYPE_TEXT = 'text';
     const MSGTYPE_IMAGE = 'image';
@@ -54,7 +49,7 @@ class WeChat
         $nonce = $_GET['nonce'];
         $this->encrypt_type = isset($_GET["encrypt_type"]) ? $_GET["encrypt_type"] : '';
         $postStr = file_get_contents("php://input");
-        $pc = new WXBizMsgCrypt(C('TOKEN'), C('ENCODING_AES_KEY'), C('APP_ID'));
+        $pc = new Weixin_Crypt_BizMsgCrypt(C('TOKEN'), C('ENCODING_AES_KEY'), C('APP_ID'));
         $errCode = $pc->decryptMsg($msg_signature, $timeStamp, $nonce, $postStr, $msg);
         if ($errCode == 0) {
             $this->_revAtt = (array)simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -399,12 +394,12 @@ class WeChat
                 return false;
             $msg = $this->_msg;
         }
-        $xmlParse = new XMLParse();
-        $xmlData = $xmlParse->xml_encode($msg);
+        $Weixin_Crypt_XMLParse = new Weixin_Crypt_XMLParse();
+        $xmlData = $Weixin_Crypt_XMLParse->xml_encode($msg);
         if ($this->encrypt_type == 'aes') { //如果来源消息为加密方式
             $timestamp = time();
             $nonce = rand(77, 999) * rand(605, 888) * rand(11, 99);
-            $pc = new WXBizMsgCrypt(C('TOKEN'), C('ENCODING_AES_KEY'), C('APP_ID'));
+            $pc = new Weixin_Crypt_BizMsgCrypt(C('TOKEN'), C('ENCODING_AES_KEY'), C('APP_ID'));
             $encryptXMLData = '';
             $encryptState = $pc->encryptMsg($xmlData, $timestamp, $nonce, $encryptXMLData);
             if ($encryptState === 0) {

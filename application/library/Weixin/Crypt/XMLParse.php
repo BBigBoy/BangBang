@@ -1,12 +1,10 @@
 <?php
-namespace Platform\Common\WXCrypt;
-
 /**
  * XMLParse class
  *
  * 提供提取消息格式中的密文及生成回复消息格式的接口.
  */
-class XMLParse
+class Weixin_Crypt_XMLParse
 {
     /**
      * 提取出xml数据包中的加密消息
@@ -30,6 +28,7 @@ class XMLParse
      * @param string $signature 安全签名
      * @param string $timestamp 时间戳
      * @param string $nonce 随机字符串
+     * @return string
      */
     public function generate($encrypt, $signature, $timestamp, $nonce)
     {

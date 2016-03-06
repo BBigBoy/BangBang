@@ -13,6 +13,10 @@ class IndexController extends Own_Controller_Base
 
     public function indexAction()
     {
+        new SampleModel();
+        echo '<pre>';
+        var_dump($_SERVER);
+        return false;
     }
 
     /**
@@ -62,8 +66,8 @@ class IndexController extends Own_Controller_Base
     public function huochepiaotuanweiAction()
     {
         //检测免费领取火车票业务是否使用
-        $taskInfo['publish_user'] = 1;//$this->session('userId')
-        $taskInfo['publish_user_openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';//$this->session('openid')
+        $taskInfo['publish_user'] = 1;//session('userId')
+        $taskInfo['publish_user_openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';//session('openid')
         $taskInfo['activity_id'] = 1;
         $task = (new Bang_TaskModel())->findTask($taskInfo);
         if ($task) {
@@ -91,16 +95,16 @@ class IndexController extends Own_Controller_Base
         if (!$valiResult) {
             $returnMsg['errCode'] = -3;
             $returnMsg['errMsg'] = 'Data is not legitimate!';
-        } else if (!$this->session('openid')) {
+        } else if (!session('openid')) {
             $returnMsg['errCode'] = -2;
             $returnMsg['errMsg'] = 'Unauthorized Access!';
         } else {
             $userModle = new Bang_UserModel();
-            $userInfo['openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';// $this->session('openid');
+            $userInfo['openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';// session('openid');
             $findUserInfo = $userModle->findUser($userInfo);
             if (!$findUserInfo) {
                 $userInfo['name'] = $this->getParam('post.name');
-                $userInfo['nick_name'] = $this->session('nickname');
+                $userInfo['nick_name'] = session('nickname');
                 $userInfo['tel'] = $this->getParam('post.tel');
                 $userInfo['level'] = 0;
                 $userInfo['last_login_time'] = time();
@@ -110,16 +114,16 @@ class IndexController extends Own_Controller_Base
                     $returnMsg['errCode'] = -1;
                     $returnMsg['errMsg'] = 'System wrong1!';
                 } else {
-                    $this->session('userId', $userId);
+                    session('userId', $userId);
                 }
             } else {
-                $this->session('userId', $findUserInfo['_id']);
+                session('userId', $findUserInfo['_id']);
             }
-            if ($this->session('userId')) {
-                $taskInfo['publish_user'] = $this->session('userId');
-                $taskInfo['publish_user_openid'] = $this->session('openid');
+            if (session('userId')) {
+                $taskInfo['publish_user'] = session('userId');
+                $taskInfo['publish_user_openid'] = session('openid');
                 $taskInfo['activity_id'] = 1;
-                $taskModel=new Bang_TaskModel();
+                $taskModel = new Bang_TaskModel();
                 $hadUse = $taskModel->findTask($taskInfo);
                 if ($hadUse) {
                     $returnMsg['errCode'] = 2;
@@ -162,12 +166,12 @@ class IndexController extends Own_Controller_Base
         $modle = new Bang_TaskModel();
         $returnMsg['errCode'] = 0;
         $returnMsg['errMsg'] = 'ok';
-        if (!$this->session('userId')) {
+        if (!session('userId')) {
             $returnMsg['errCode'] = -2;
             $returnMsg['errMsg'] = 'Unauthorized Access!';
         } else {
-            $taskInfo['publish_user'] = $this->session('userId');
-            $taskInfo['publish_user_openid'] = $this->session('openid');
+            $taskInfo['publish_user'] = session('userId');
+            $taskInfo['publish_user_openid'] = session('openid');
             $taskInfo['activity_id'] = 1;
             $hadUse = $modle->findTask($taskInfo);
             if ($hadUse) {
@@ -231,12 +235,12 @@ class IndexController extends Own_Controller_Base
         if (!$valiResult) {
             $returnMsg['errCode'] = -3;
             $returnMsg['errMsg'] = 'Data is not legitimate!';
-        } else if (!$this->session('openid')) {
+        } else if (!session('openid')) {
             $returnMsg['errCode'] = -2;
             $returnMsg['errMsg'] = 'Unauthorized Access!';
         } else {
-            $taskInfo['publish_user'] = $this->session('userId') ?: 0;
-            $taskInfo['publish_user_openid'] = $this->session('openid');
+            $taskInfo['publish_user'] = session('userId') ?: 0;
+            $taskInfo['publish_user_openid'] = session('openid');
             $taskInfo['category'] = $this->getParam('post.category_index');
             $taskInfo['instruction'] = $this->getParam('post.instruction');
             $taskInfo['reward'] = ((float)$this->getParam('post.reward')) * 100;
@@ -290,12 +294,12 @@ class IndexController extends Own_Controller_Base
         if (!$valiResult) {
             $returnMsg['errCode'] = -3;
             $returnMsg['errMsg'] = 'Data is not legitimate!';
-        } else if (!$this->session('openid')) {
+        } else if (!session('openid')) {
             $returnMsg['errCode'] = -2;
             $returnMsg['errMsg'] = 'Unauthorized Access!';
         } else {
             $UserModel = new Bang_UserModel();
-            $userInfo['openid'] = $this->session('openid');
+            $userInfo['openid'] = session('openid');
             $findUserInfo = $UserModel->findUser($userInfo);
             if ($findUserInfo) {
                 $returnMsg['errCode'] = 2;

@@ -1,6 +1,13 @@
 <?php
 /*确保Smarty.class.php在Smarty/libs/下*/
-Yaf_Loader::import("Smarty/libs/Smarty.class.php");   /*基类目录为library*/
+if (function_exists('saeAutoLoader')) {// 自动识别SAE环境
+    Yaf_Loader::import("Smarty/sysplugins/smarty_internal_data.php");   /*基类目录为library*/
+    Yaf_Loader::import("Smarty/sysplugins/smarty_internal_resource_file.php");   /*基类目录为library*/
+    Yaf_Loader::import("Smarty/sysplugins/smarty_internal_template.php");   /*基类目录为library*/
+    Yaf_Loader::import("Smarty/Smarty.class.php");   /*基类目录为library*/
+} else {
+    Yaf_Loader::import("Smarty/Local/libs/Smarty.class.php");   /*基类目录为library*/
+}
 
 class Smarty_Adapter implements Yaf_View_Interface
 {
@@ -24,7 +31,9 @@ class Smarty_Adapter implements Yaf_View_Interface
         if (null !== $tmplPath) {
             $this->setScriptPath($tmplPath);
         }
-
+        if (!is_dir($extraParams['compile_dir'])) {
+            mkdir($extraParams['compile_dir']);
+        }
         foreach ($extraParams as $key => $value) {
             $this->_smarty->$key = $value;
         }

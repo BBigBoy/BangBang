@@ -1,10 +1,5 @@
 <?php
-namespace Platform\Controller;
-
-use Platform\Common\WXCrypt\WXBizMsgCrypt;
-use Think\Controller;
-
-class WXEventController extends Controller
+class Wexin_EventController extends Own_Controller_Base
 {
     public function index()
     {

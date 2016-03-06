@@ -1,5 +1,5 @@
 <?php
-class UserManage
+class Weixin_Chat_UserManage
 {
     const USER_INFO_GET = 'https://api.weixin.qq.com/cgi-bin/user/info?';
     const MUTI_USER_INFO_GET = 'https://api.weixin.qq.com/cgi-bin/user/info/batchget?';
@@ -19,7 +19,7 @@ class UserManage
             errorLog('查询用户信息必须指定对应公众账号');
             return false;
         }
-        $requestUrl = UserManage::USER_INFO_GET . 'access_token=' . getAuthorizerAccessTokenByRefreshToken($auth_app_id) . '&openid=' . $openid . '&lang=zh_CN';
+        $requestUrl = self::USER_INFO_GET . 'access_token=' . getAuthorizerAccessTokenByRefreshToken($auth_app_id) . '&openid=' . $openid . '&lang=zh_CN';
         $userInfo = requestWXServer($requestUrl);
         return $userInfo;
     }
@@ -43,7 +43,7 @@ class UserManage
         foreach ($openidAtt as $openid) {
             $postData['user_list'][] = array('openid' => $openid);
         }
-        $requestUrl = UserManage::MUTI_USER_INFO_GET . 'access_token=' . getAuthorizerAccessTokenByRefreshToken($auth_app_id);
+        $requestUrl = self::MUTI_USER_INFO_GET . 'access_token=' . getAuthorizerAccessTokenByRefreshToken($auth_app_id);
         $userInfoList = requestWXServer($requestUrl, $postData);
         return $userInfoList;
     }
@@ -60,7 +60,7 @@ class UserManage
             errorLog('查询用户信息必须指定对应公众账号');
             return false;
         }
-        $requestUrl = UserManage::USER_LIST_GET . 'access_token=' . getAuthorizerAccessTokenByRefreshToken($auth_app_id);
+        $requestUrl = self::USER_LIST_GET . 'access_token=' . getAuthorizerAccessTokenByRefreshToken($auth_app_id);
         !$startOpenId ?: ($requestUrl .= ('&next_openid=' . $startOpenId));
         $userInfo = requestWXServer($requestUrl);
         return $userInfo;

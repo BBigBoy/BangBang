@@ -1,17 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: BigBigBoy
- * Date: 2015/7/18
- * Time: 22:54
- */
-
-namespace Platform\Controller;
-
-use Common\Common\AsyncTaskManager;
-use Think\Controller;
-
-class TaskQueueController extends Controller
+class Wexin_TaskController extends Own_Controller_Base
 {
 
     /**
@@ -24,9 +12,9 @@ class TaskQueueController extends Controller
     public function secondsTask($taskId = 0, $className = '', $methodName = '')
     {
         $echoStr = '';
-        $asyncTaskInfo = AsyncTaskManager::getAsyncTask($taskId, $className, $methodName);
+        $asyncTaskInfo = Own_AsyncTaskManager::getAsyncTask($taskId, $className, $methodName);
         if ($asyncTaskInfo) {
-            $dealResult = AsyncTaskManager::dealAsyncTask($asyncTaskInfo);
+            $dealResult = Own_AsyncTaskManager::dealAsyncTask($asyncTaskInfo);
             if ($dealResult === false) {
                 errorLog('异步任务处理失败：' . json_encode($asyncTaskInfo));
                 $echoStr = ' secondsTask  execute fail! ---> taskID:' . $asyncTaskInfo['id'] . "\n   --->taskInfo:" . json_encode($asyncTaskInfo);
@@ -45,7 +33,7 @@ class TaskQueueController extends Controller
      */
     public function dailyTask()
     {
-        AsyncTaskManager::addAsyncTask('Platform\Common\WXDailyTask',
+        Own_AsyncTaskManager::addAsyncTask('Platform\Common\WXDailyTask',
             'remainEffectiveAuthorizerRefreshToken', array(), 20, 5, '同步授权微信公众帐号授权刷新口令', array());
         echo "\n\n" . time() . "\ndailyTask";
     }

@@ -1,7 +1,9 @@
 <?php
-class Weixin_JSSDK_JSSDK
+
+class Weixin_JS_SDK
 {
     private $authorizerAppId;
+    private $appid;
 
     //private $appSecret;
 
@@ -9,6 +11,7 @@ class Weixin_JSSDK_JSSDK
     {
         $this->authorizerAppId = $authorizerAppId;
         //$this->appSecret = $appSecret;
+        $this->appid = C('APP_ID');
     }
 
     public function getSignPackage()
@@ -39,10 +42,10 @@ class Weixin_JSSDK_JSSDK
 
     private function getJsApiTicket($authorizerAppid)
     {
-        $ticketModel = M('JsapiTicket');
-        $map['authorizerappid'] = $authorizerAppid;
-        $map['componentappid'] = C('APP_ID');
-        $data = $ticketModel->where($map)->find();
+        $whereAuthorizer['authorizerappid'] = $authorizerAppid;
+        $whereAuthorizer['componentappid'] = $this->appid;
+        $ticketModel = new Weixin_JSTicketModel();
+        $data = $ticketModel->findAuthorizer($whereAuthorizer);
         if (!is_null($data)) {
             $vld_timestamp = $data['vld_timestamp'];
             $jsapi_ticket = $data['jsapi_ticket'];
@@ -50,23 +53,21 @@ class Weixin_JSSDK_JSSDK
                 return $jsapi_ticket;
             }
         }
-        {
-            $authorizerAccessToken = getAuthorizerAccessTokenByRefreshToken($authorizerAppid);
-            // 如果是企业号用以下 URL 获取 ticket
-            // $url = "https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket?access_token=$accessToken";
-            $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$authorizerAccessToken";
-            $res = requestWXServer($url);
-            $jsapi_ticket = $res['ticket'];
-            $vld_timestamp = time() + ((int)$res['expires_in']);
-            $ticketData['authorizerappid'] = $authorizerAppid;
-            $ticketData['componentappid'] = C('APP_ID');
-            $ticketData['jsapi_ticket'] = $jsapi_ticket;
-            $ticketData['vld_timestamp'] = $vld_timestamp;
-            if (is_null($data)) {
-                $ticketModel->add($ticketData);
-            } else {
-                $ticketModel->where($map)->save($ticketData);
-            }
+        $authorizerAccessToken = getAuthorizerAccessTokenByRefreshToken($authorizerAppid);
+        // 如果是企业号用以下 URL 获取 ticket
+        // $url = "https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket?access_token=$accessToken";
+        $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$authorizerAccessToken";
+        $res = requestWXServer($url);
+        $jsapi_ticket = $res['ticket'];
+        $vld_timestamp = time() + ((int)$res['expires_in']);
+        $ticketData['authorizerappid'] = $authorizerAppid;
+        $ticketData['componentappid'] = $this->appid;
+        $ticketData['jsapi_ticket'] = $jsapi_ticket;
+        $ticketData['vld_timestamp'] = $vld_timestamp;
+        if (is_null($data)) {
+            $ticketModel->addTicketInfo($ticketData);
+        } else {
+            $ticketModel->updateTiketInfo($ticketData, $whereAuthorizer);
         }
         return $jsapi_ticket;
     }

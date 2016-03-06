@@ -1,7 +1,4 @@
 <?php
-namespace Platform\Common\WXStoreManage;
-
-load('Platform.WXOpenplatform');
 
 /**
  * Class StoreManage
@@ -17,7 +14,7 @@ load('Platform.WXOpenplatform');
  * 删除门店方法deleteStore($poi_id)，
  * 获得门店类目信息getWXCategory()
  */
-class StoreManage
+class Weixin_StoreManage_StoreManage
 {
     const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com';
     const LOGO_UPLOAD = '/cgi-bin/media/uploadimg?';
@@ -74,9 +71,9 @@ class StoreManage
      * @param $data array 向微信服务器提交的数据
      * @return bool|mixed  若成功返回一个数组
      */
-    public function  creatStore()
+    public function creatStore()
     {
-        $storeObj = new Store(333788,
+        $storeObj = new Weixin_StoreManage_Store(333788,
             '麦当劳', '艺苑路店', '广东省', '广州市', '珠海区', '怡园路11号', '020-12345678', (int)1, '115.32375', '25.097486',
             '麦辣鸡腿套餐，麦乐鸡，全家桶', '免费WiFi，外卖服务',
             '麦当劳是全球大型跨国连锁餐厅，1940 年创立于美国，在世界上
@@ -92,7 +89,7 @@ class StoreManage
         $access_token = getAuthorizerAccessTokenByRefreshToken($this->authorizedAppId);
         $post_url = self::API_BASE_URL_PREFIX . self::ADD_POI . 'access_token=' . $access_token;
         $returnContent = requestWXServer($post_url, decodeUnicodeToUTF8(json_encode($data)));
-        dump($returnContent);
+        var_dump($returnContent);
     }
 
     /**
@@ -109,7 +106,7 @@ class StoreManage
         echo $post_url . json_encode($data);//die();
         //decodeUnicodeToUTF8(json_encode($data)
         $returnContent = requestWXServer($post_url, $data);
-        dump($returnContent);
+        var_dump($returnContent);
     }
 
     /**
@@ -117,8 +114,8 @@ class StoreManage
      * 商户可以通过该接口，批量查询自己名下的门店list，
      * 并获取已审核通过的poi_id（所有状态均会返回poi_id，但该poi_id不一定为最终id）、
      * 商户自身sid 用于对应、商户名、分店名、地址字段
-     * @param $begin 开始位置，0 即为从第一条开始查询
-     * @param $limit 返回数据条数，最大允许50，默认为20
+     * @param $begin int 开始位置，0 即为从第一条开始查询
+     * @param $limit int 返回数据条数，最大允许50，默认为20
      */
     public function searchStoreList($begin, $limit)
     {
@@ -131,7 +128,7 @@ class StoreManage
         echo $post_url . json_encode($data);//die();
         //decodeUnicodeToUTF8(json_encode($data)
         $returnContent = requestWXServer($post_url, $data);
-        dump($returnContent);
+        var_dump($returnContent);
     }
 
     /**
@@ -139,7 +136,7 @@ class StoreManage
      * 商户可以通过该接口，修改门店的服务信息，包括：图片列表、营业时间、
      * 推荐、特色服务、简介、人均价格、电话7 个字段（名称、坐标、地址等不可修改）
      * 修改后需要人工审核。
-     * @param $poi
+     * @param $poi_id
      * @param string $telephone 门店的电话（纯数字，区号、分机号均由“-”隔开）如：020-12345678
      * @param string $image_url_str 门店的图片URL，此URL必须由本类的uploadLogo()方法生成
      * @param string $recommend 推荐品，餐厅可为推荐菜；酒店为推荐套房；景点为推荐游玩景点等，
@@ -177,7 +174,7 @@ class StoreManage
         $post_url = self::API_BASE_URL_PREFIX . self:: UPDATA_STORE . 'access_token=' . $access_token;
         echo $post_url . json_encode($data);
         $returnContent = requestWXServer($post_url, $data);
-        dump($returnContent);
+        var_dump($returnContent);
     }
 
     /**
@@ -194,7 +191,7 @@ class StoreManage
         echo $post_url . json_encode($data);//die();
         //decodeUnicodeToUTF8(json_encode($data)
         $returnContent = requestWXServer($post_url, $data);
-        dump($returnContent);
+        var_dump($returnContent);
     }
 
     /**
@@ -205,10 +202,9 @@ class StoreManage
         $data = null;
         $access_token = getAuthorizerAccessTokenByRefreshToken($this->authorizedAppId);
         $post_url = self::API_BASE_URL_PREFIX . self::GET_WXCATEGORY_LIST . 'access_token=' . $access_token;
-        echo $post_url . json_encode($data);//die();
-        //decodeUnicodeToUTF8(json_encode($data)
+        echo $post_url . json_encode($data);
         $returnContent = requestWXServer($post_url, $data);
-        dump($returnContent);
+        var_dump($returnContent);
     }
 
     /**
@@ -242,8 +238,8 @@ class StoreManage
             $value['base_info']['categories'] = decodeUnicodeToUTF8(json_encode($value['base_info']['categories']));
             $poiList[] = $value['base_info'];
         }
-        $poiModel = M($this->authorizedAppId . 'Poi');
-        $delState = $poiModel->where('1=1')->delete();
+        $poiModel = new Weixin_PoiModel($this->authorizedAppId);
+        $delState = $poiModel->delAll();
         if ($delState !== false) {
             if ($poiList) {
                 $addState = $poiModel->addAll($poiList);
@@ -265,8 +261,9 @@ class StoreManage
      */
     public function getAvailablePoiList()
     {
-        $poiModel = M($this->authorizedAppId . 'Poi');
-        $availablePoiList = $poiModel->where('available_state=3')->select();
+        $poiModel = new Weixin_PoiModel($this->authorizedAppId);
+        $wherePoi['available_state'] = 3;
+        $availablePoiList = $poiModel->findMultiPoi($wherePoi);
         if (is_array($availablePoiList)) {
             return $availablePoiList;
         } else {
@@ -281,9 +278,9 @@ class StoreManage
      */
     public function getAvailablePoiNameList()
     {
-        $poiModel = M($this->authorizedAppId . 'Poi');
+        $poiModel = new Weixin_PoiModel($this->authorizedAppId);
         $wherePoi['available_state'] = 3;
-        $availablePoiList = $poiModel->where($wherePoi)->field('business_name,branch_name,poi_id')->select();
+        $availablePoiList = $poiModel->findMultiPoi($wherePoi, 'business_name,branch_name,poi_id');
         if (is_array($availablePoiList)) {
             $poiList[0]['name'] = '全部门店';
             foreach ($availablePoiList as &$value) {

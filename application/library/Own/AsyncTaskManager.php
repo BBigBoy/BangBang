@@ -1,11 +1,4 @@
 <?php
-namespace Common\Common;
-
-interface AsyncTask
-{
-    public function execute();
-}
-
 /**
  * 异步任务处理类
  * 1、通过addAsyncTask添加一个异步任务
@@ -20,7 +13,7 @@ interface AsyncTask
  * Date: 2015/10/25
  * Time: 11:29
  */
-class AsyncTaskManager
+class Own_AsyncTaskManager
 {
 
     /**
@@ -121,7 +114,7 @@ class AsyncTaskManager
                     }
                 }
                 if ($unCompleteTask) {
-                    AsyncTaskManager::updateAsyncTaskState($unCompleteTask, 2);
+                    Own_AsyncTaskManager::updateAsyncTaskState($unCompleteTask, 2);
                 }*/
                 $newRunningAsyncTasks = str_replace('-', '', trim(S('RunningAsyncTasks'), ','));
                 if ($newRunningAsyncTasks) {
@@ -174,7 +167,7 @@ class AsyncTaskManager
      */
     public static function dealAsyncTask($aTaskItem)
     {
-        register_shutdown_function(array('Common\Common\AsyncTaskManager', 'fatalError'));
+        register_shutdown_function(array('Common\Common\Own_AsyncTaskManager', 'fatalError'));
         if (!($aTaskItem && is_array($aTaskItem))) {
             errorLog(json_encode($aTaskItem) . '<-->$aTaskItem错误');
             return false;
@@ -244,14 +237,14 @@ class AsyncTaskManager
                 S('RunningAsyncTasks', $newRunningAsyncTasks ?: null);
 //                S('AsyncTask' . $aTaskItem['id'], null);
                 if ($asyncTaskResult === true) {
-                    AsyncTaskManager::updateAsyncTaskState($aTaskItem['id']);
+                    Own_AsyncTaskManager::updateAsyncTaskState($aTaskItem['id']);
                     return (int)($aTaskItem['id']);
                 } elseif ($asyncTaskResult === false) {
-                    AsyncTaskManager::updateAsyncTaskState($aTaskItem['id'], -1);
+                    Own_AsyncTaskManager::updateAsyncTaskState($aTaskItem['id'], -1);
                     return false;
                 } else {
                     errorLog('添加的任务返回值未按标准实现，不是bool类型变量！');
-                    AsyncTaskManager::updateAsyncTaskState($aTaskItem['id'], -2);
+                    Own_AsyncTaskManager::updateAsyncTaskState($aTaskItem['id'], -2);
                     return false;
                 }
             } else {
@@ -273,7 +266,7 @@ class AsyncTaskManager
 //        errorLog($_GET['AsyncTaskID'] . 'uuuu' . S('RunningAsyncTasks'));
         if (isset($_GET['AsyncTaskID']) && isset($e['message']) && (strpos($e['message'], 'Maximum execution time') !== false)) {
             if (isset($_GET['cron']) && ($_GET['cron'] != '*+')) {
-                AsyncTaskManager::updateAsyncTaskState($_GET['AsyncTaskID'], 2);
+                Own_AsyncTaskManager::updateAsyncTaskState($_GET['AsyncTaskID'], 2);
             }
             $runningAsyncTasks = str_replace('-' . $_GET['AsyncTaskID'] . ',', '', S('RunningAsyncTasks'));
             //当S函数设置的值为'',即空字符串时，设置不会成功，所以需要判断

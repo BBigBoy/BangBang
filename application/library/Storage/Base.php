@@ -1,7 +1,6 @@
 <?php
 // 分布式文件存储类
-//TODO:在新浪云中要切换到KVDB
-class Cache_Storage
+class Storage_Base
 {
 
     /**
@@ -14,16 +13,15 @@ class Cache_Storage
     /**
      * 连接分布式文件系统
      * @access public
-     * @param string $type 文件类型
      * @param array $options 配置数组
-     * @return void
      */
     static public function connect($options = array())
     {
         if (function_exists('saeAutoLoader')) {// 自动识别SAE环境
-            $type='Sae';
+            self::$handler = new Storage_Sae($options);
+        }else{
+            self::$handler = new Storage_File($options);
         }
-        self::$handler = new Cache_File($options);
     }
 
     static public function __callstatic($method, $args)

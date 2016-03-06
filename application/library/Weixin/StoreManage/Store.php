@@ -1,17 +1,10 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2015/7/1
- * Time: 15:24
- */
-namespace Platform\Common\WXStoreManage;
-/**
  * Class Store
  * 这是门店生成类，此类对应的对象的属性就是要向微信服务器提交的数据
  * @package Platform\Common\WXStoreManage
  */
-class Store
+class Weixin_StoreManage_Store
 {
     /**构造函数中的变量是要向微信服务器提交的数据，请按照顺序及正确的格式书写
      * @param string $sid （非必须）自己自定义的sid，请自己确保唯一性，sid用于后续与获得的poi_id后的数据做对应
@@ -75,7 +68,7 @@ class Store
 
     /**
      * 这个方法用于返回微信服务器要求格式的门店图片URL
-     * @param $image_url_str  此参数要填写的是字符串形式的URL，URL必须由上传微信服务器的图片返回的URL，
+     * @param $image_url_str string  此参数要填写的是字符串形式的URL，URL必须由上传微信服务器的图片返回的URL，
      * 多个URL的时候，请用逗号（半角）隔开
      */
     public function set_photo_list($image_url_str)

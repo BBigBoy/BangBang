@@ -115,7 +115,11 @@ class Db_Mysql extends PDO
             exit($this->error);
         }
         $tDB = Yaf_Registry::get("config")->get('mysql')->get('w');
-        if (empty($dsn)) $dsn = $tDB['dsn'];
+        if (function_exists('saeAutoLoader')) {// 自动识别SAE环境
+            if (empty($dsn)) $dsn = 'mysql:host=' . $tDB['host'] . ';port=' . $tDB['port'] . ';dbname=' . $tDB['dbname'] . ';';
+        } else {
+            if (empty($dsnd)) $dsn = $tDB['dsn'];
+        }
         if (empty($username)) $username = $tDB['user'];
         if (empty($password)) $password = $tDB['pwd'];
         // Set driver options if not provided.

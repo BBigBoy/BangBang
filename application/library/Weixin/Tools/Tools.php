@@ -1,12 +1,11 @@
 <?php
-namespace Platform\Common\WXTools;
 /**
  * Created by PhpStorm.
  * User: BigBigBoy
  * Date: 2015/8/25
  * Time: 16:53
  */
-class Tools
+class Weixin_Tools_Tools
 {
 
     /**

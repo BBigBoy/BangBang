@@ -1,3 +1,2 @@
 .idea
-appliaction/views/templates_c/*
-appliaction/views/templates_d/*
+runtime/*

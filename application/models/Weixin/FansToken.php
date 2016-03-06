@@ -1,9 +1,9 @@
 <?php
 
-class Weixin_AccountAuthInfoModel
+class Weixin_FansTokenModel
 {
-    private $tableName = 'think_account_authorizer_info';
-    private $accountDb;
+    private $tableName = 'think_o_auth_fans_token';
+    private $fansTokenDb;
 
 
     /**
@@ -11,17 +11,22 @@ class Weixin_AccountAuthInfoModel
      */
     public function __construct()
     {
-        $this->accountDb = new Db_Mysql();
+        $this->fansTokenDb = new Db_Mysql();
     }
 
-    function findAccount($whereAccount)
+    function findFans($whereFans, $fields = '*')
     {
-        return $this->accountDb->get_row($this->tableName, $whereAccount);
+        return $this->fansTokenDb->get_row($this->tableName, $whereFans, $fields);
     }
 
-    function updateAccount($updateInfo, $whereAccount)
+    function updateFans($whereFans, $fansInfo)
     {
-        return $this->accountDb->update($this->tableName, $updateInfo, $whereAccount);
+        return $this->fansTokenDb->update($this->tableName, $fansInfo, $whereFans);
+    }
+
+    function addFans($fansInfo)
+    {
+        return $this->fansTokenDb->insert($this->tableName, $fansInfo);
     }
 
 }

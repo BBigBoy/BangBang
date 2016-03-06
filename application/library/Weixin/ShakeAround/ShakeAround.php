@@ -1,15 +1,9 @@
 <?php
-namespace Platform\Common\WXShakeAround;
-
-use Common\Common\ParamValidate;
-
-load('Platform.WXOpenplatform');
-
 /**
  * Class ShakeAround  摇一摇周边类，包含相关方法
  * 这里面的方法其实可以归纳为switch...case结构，但是为了清晰表述不同接口，以方法形式展现。
  */
-class ShakeAround
+class Weixin_ShakeAround_ShakeAround
 {
     ///微信摇一摇周边
     const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com/shakearound';//以下API接口URL需要使用此前缀
@@ -45,7 +39,7 @@ class ShakeAround
 
     /**
      * @param $authorizedAppId string 授权公众账号的appId
-     * @return ShakeAround
+     * @return Weixin_ShakeAround_ShakeAround
      */
     public static function getInstance($authorizedAppId)
     {
@@ -82,11 +76,11 @@ class ShakeAround
         apply_reason string 设备申请理由（不超过100个字）
         comment string 申请备注信息（NULL）（不超过15个汉字或30个英文字母）
         poi_id int 设备关联的门店ID（NULL）*/
-        $valiRuleArr['quantity'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $valiRuleArr['apply_reason'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 100);
-        $valiRuleArr['comment'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::IS_NULL => true, ParamValidate::MAX_LEN => 30);
-        $valiRuleArr['poi_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR, ParamValidate::IS_NULL => true);
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiRuleArr['quantity'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $valiRuleArr['apply_reason'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 100);
+        $valiRuleArr['comment'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::IS_NULL => true, Own_Validate::MAX_LEN => 30);
+        $valiRuleArr['poi_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR, Own_Validate::IS_NULL => true);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_APPLYID, $data);
             return $returnContent;
@@ -116,8 +110,8 @@ class ShakeAround
      */
     public function checkDeviceApplyState($data)
     {
-        $valiRuleArr['apply_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiRuleArr['apply_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_APPLYSTATUS, $data);
             return $returnContent;
@@ -137,21 +131,21 @@ class ShakeAround
      */
     public function updateDeviceComment($comment = '', $device_id = 0, $uuid = '', $major = 0, $minor = 0)
     {
-        $valiRuleArr['comment'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 30, ParamValidate::IS_NULL => true);
+        $valiRuleArr['comment'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 30, Own_Validate::IS_NULL => true);
         $device_identifier = self::getDeviceIdentifier($device_id, $uuid, $major, $minor);
-        $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-            array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-        $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-        $valiRuleArr['device_identifier'] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-        , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+        $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+            array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+        $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+        $valiRuleArr['device_identifier'] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+        , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
         $data = array(
             'device_identifier' => $device_identifier,
             'comment' => $comment
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_UPDATEINFO, $data);
             return $returnContent;
@@ -204,31 +198,31 @@ class ShakeAround
      */
     public function searchDevice($data)
     {
-        $valiRuleArr['type'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+        $valiRuleArr['type'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         if ($data['type'] === 1) {
             $deviceIdentifiersValiRuleArr = array();
             $valiRuleArr['device_identifiers'] =
-                array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-                , ParamValidate::VALI_RULE_ARR => &$deviceIdentifiersValiRuleArr,
-                    ParamValidate::MAX_ARR_LEN_VAR => 50);
+                array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+                , Own_Validate::VALI_RULE_ARR => &$deviceIdentifiersValiRuleArr,
+                    Own_Validate::MAX_ARR_LEN_VAR => 50);
             foreach ($data['device_identifiers'] as $key => $device_identifier) {
-                $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-                    array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-                $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-                $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-                $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-                $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-                $deviceIdentifiersValiRuleArr[$key] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-                , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+                $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+                    array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+                $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+                $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+                $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+                $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+                $deviceIdentifiersValiRuleArr[$key] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+                , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
             }
         } else {
-            $valiRuleArr['begin'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $valiRuleArr['count'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR, ParamValidate::MAX_INT => 50);
+            $valiRuleArr['begin'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $valiRuleArr['count'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR, Own_Validate::MAX_INT => 50);
             if ($data['type'] === 3) {
-                $valiRuleArr['apply_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+                $valiRuleArr['apply_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
             }
         }
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_SEARCH, $data);
             return $returnContent;
@@ -249,21 +243,21 @@ class ShakeAround
      */
     public function bindLocationDevice($poi_id, $device_id = 0, $uuid = '', $major = 0, $minor = 0)
     {
-        $valiRuleArr['poi_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+        $valiRuleArr['poi_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $device_identifier = self::getDeviceIdentifier($device_id, $uuid, $major, $minor);
-        $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-            array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-        $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-        $valiRuleArr['device_identifier'] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-        , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+        $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+            array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+        $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+        $valiRuleArr['device_identifier'] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+        , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
         $data = array(
             'device_identifier' => $device_identifier,
             'poi_id' => $poi_id
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_BINDLOCATION, $data);
             return $returnContent;
@@ -289,26 +283,26 @@ class ShakeAround
         $pageIdsValiRuleArr = array();
         foreach ($page_id_att as $key => $pageId) {
             $pageIdsValiRuleArr[$key] =
-                array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+                array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         }
         $valiRuleArr['page_ids'] =
-            array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-            , ParamValidate::MAX_ARR_LEN_VAR => 30
-            , ParamValidate::VALI_RULE_ARR => $pageIdsValiRuleArr);
+            array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+            , Own_Validate::MAX_ARR_LEN_VAR => 30
+            , Own_Validate::VALI_RULE_ARR => $pageIdsValiRuleArr);
         $device_identifier = self::getDeviceIdentifier($device_id, $uuid, $major, $minor);
-        $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-            array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-        $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-        $valiRuleArr['device_identifier'] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-        , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+        $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+            array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+        $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+        $valiRuleArr['device_identifier'] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+        , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
         $data = array(
             'device_identifier' => $device_identifier,
             'page_ids' => $page_id_att
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_BINDPAGE, $data);
             return $returnContent;
@@ -334,22 +328,22 @@ class ShakeAround
      */
     public function searchRelation($data)
     {
-        $valiRuleArr['type'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+        $valiRuleArr['type'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         if ($data['type'] === 1) {
-            $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-                array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-            $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-            $valiRuleArr['device_identifier'] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-            , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+            $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+                array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+            $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+            $valiRuleArr['device_identifier'] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+            , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
         } else {
-            $valiRuleArr['begin'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $valiRuleArr['count'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $valiRuleArr['page_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+            $valiRuleArr['begin'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $valiRuleArr['count'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $valiRuleArr['page_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         }
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_SEARCH_RELATION, $data);
             return $returnContent;
@@ -376,10 +370,10 @@ class ShakeAround
             "page_url" => $page_url,
             "comment" => $comment
         );*/
-        $valiRuleArr['title'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 12);
-        $valiRuleArr['description'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 14);
-        $valiRuleArr['comment'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 30);
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiRuleArr['title'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 12);
+        $valiRuleArr['description'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 14);
+        $valiRuleArr['comment'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 30);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_PAGE_ADD, $data);
             return $returnContent;
@@ -409,11 +403,11 @@ class ShakeAround
             "page_url" => $page_url,
             "comment" => $comment
         );*/
-        $valiRuleArr['page_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $valiRuleArr['title'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 12);
-        $valiRuleArr['description'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 14);
-        $valiRuleArr['comment'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR, ParamValidate::MAX_LEN => 30);
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiRuleArr['page_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $valiRuleArr['title'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 12);
+        $valiRuleArr['description'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 14);
+        $valiRuleArr['comment'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MAX_LEN => 30);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_PAGE_UPDATE, $data);
             return $returnContent;
@@ -440,25 +434,25 @@ class ShakeAround
                 'count' => $pageSearchInfo['count']
             );
         }*/
-        $valiRuleArr['type'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+        $valiRuleArr['type'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         if ($pageSearchInfo['type'] === 1) {
             $pageIdsValiRuleArr = array();
             foreach ($pageSearchInfo['page_ids'] as $key => $pageId) {
                 $pageIdsValiRuleArr[$key] =
-                    array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+                    array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
             }
             $valiRuleArr['page_ids'] =
-                array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-                , ParamValidate::MAX_ARR_LEN_VAR => 50
-                , ParamValidate::VALI_RULE_ARR => $pageIdsValiRuleArr);
+                array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+                , Own_Validate::MAX_ARR_LEN_VAR => 50
+                , Own_Validate::VALI_RULE_ARR => $pageIdsValiRuleArr);
         } else {
             $valiRuleArr['begin'] =
-                array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+                array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
             $valiRuleArr['count'] =
-                array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR
-                , ParamValidate::MAX_INT => 50);
+                array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR
+                , Own_Validate::MAX_INT => 50);
         }
-        $valiState = ParamValidate::validateFuncParam($pageSearchInfo, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($pageSearchInfo, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_PAGE_SEARCH, $pageSearchInfo);
             return $returnContent;
@@ -474,11 +468,11 @@ class ShakeAround
      */
     public function deletePage($page_id)
     {
-        $valiRuleArr['page_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+        $valiRuleArr['page_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $data = array(
             'page_id' => $page_id
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_PAGE_DELETE, $data);
             return $returnContent;
@@ -513,22 +507,22 @@ class ShakeAround
     public function statisticsByDevice($begin_date, $end_date, $device_id = 0, $uuid = '', $major = 0, $minor = 0)
     {
         $device_identifier = self::getDeviceIdentifier($device_id, $uuid, $major, $minor);
-        $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-            array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-        $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-        $valiRuleArr['device_identifier'] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-        , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
-        $valiRuleArr['begin_date'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $valiRuleArr['end_date'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+            array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+        $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+        $valiRuleArr['device_identifier'] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+        , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+        $valiRuleArr['begin_date'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $valiRuleArr['end_date'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $data = array(
             'device_identifier' => $device_identifier,
             'begin_date' => $begin_date,
             'end_date' => $end_date
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_STATISTICS_DEVICE, $data);
             return $returnContent;
@@ -546,15 +540,15 @@ class ShakeAround
     public
     function statisticsByPage($page_id, $begin_date, $end_date)
     {
-        $valiRuleArr['begin_date'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $valiRuleArr['end_date'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-        $valiRuleArr['page_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+        $valiRuleArr['begin_date'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $valiRuleArr['end_date'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+        $valiRuleArr['page_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $data = array(
             'page_id' => $page_id,
             'begin_date' => $begin_date,
             'end_date' => $end_date
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_STATISTICS_PAGE, $data);
             return $returnContent;
@@ -608,12 +602,12 @@ class ShakeAround
     public function addDeviceGroup($group_name)
     {
         $valiRuleArr['group_name'] = array(
-            ParamValidate::TYPE => ParamValidate::STRING_VAR
-        , ParamValidate::MAX_LEN => 100);
+            Own_Validate::TYPE => Own_Validate::STRING_VAR
+        , Own_Validate::MAX_LEN => 100);
         $data = array(
             'group_name' => $group_name
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_GROUP_ADD, $data);
             return $returnContent;
@@ -630,15 +624,15 @@ class ShakeAround
     public function  updateDeviceGroup($group_id, $group_name)
     {
         $valiRuleArr['group_id'] = array(
-            ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+            Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $valiRuleArr['group_name'] = array(
-            ParamValidate::TYPE => ParamValidate::STRING_VAR
-        , ParamValidate::MAX_LEN => 100);
+            Own_Validate::TYPE => Own_Validate::STRING_VAR
+        , Own_Validate::MAX_LEN => 100);
         $data = array(
             'group_id' => $group_id,
             'group_name' => $group_name
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_GROUP_UPDATE, $data);
             return $returnContent;
@@ -655,11 +649,11 @@ class ShakeAround
     public function deleteDeviceGroup($group_id)
     {
         $valiRuleArr['group_id'] = array(
-            ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+            Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $data = array(
             'group_id' => $group_id
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_GROUP_DELETE, $data);
             return $returnContent;
@@ -681,13 +675,13 @@ class ShakeAround
         {"group_id" : 124,"group_name" : "test2"}]
         }*/
         $valiRuleArr['begin'] = array(
-            ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+            Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $valiRuleArr['count'] = array(
-            ParamValidate::TYPE => ParamValidate::INTEGER_VAR
-        , ParamValidate::MAX_INT => 1000);
+            Own_Validate::TYPE => Own_Validate::INTEGER_VAR
+        , Own_Validate::MAX_INT => 1000);
         $data['begin'] = $begin;
         $data['count'] = $count;
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_GROUP_GET_LIST, $data);
             return $returnContent;
@@ -710,11 +704,11 @@ class ShakeAround
            {"device_id" : 123457,"uuid" : "",
             "major" : 10001,"minor" : 10002,"comment" : "test device2","poi_id" : 12345,}]}*/
         $valiRuleArr['group_id'] = array(
-            ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+            Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $data = array(
             'group_id' => $group_id
         );
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_GROUP_GET_DETAIL, $data);
             return $returnContent;
@@ -737,23 +731,23 @@ class ShakeAround
         /*返回的数据：
         "data": {}*/
         $valiRuleArr['group_id'] = array(
-            ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+            Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $deviceIdentifiersValiRuleArr = array();
         $valiRuleArr['device_identifiers'] =
-            array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-            , ParamValidate::VALI_RULE_ARR => &$deviceIdentifiersValiRuleArr,
-                ParamValidate::MAX_ARR_LEN_VAR => 1000);
+            array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+            , Own_Validate::VALI_RULE_ARR => &$deviceIdentifiersValiRuleArr,
+                Own_Validate::MAX_ARR_LEN_VAR => 1000);
         foreach ($data['device_identifiers'] as $key => $device_identifier) {
-            $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-                array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-            $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-            $deviceIdentifiersValiRuleArr[$key] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-            , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+            $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+                array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+            $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+            $deviceIdentifiersValiRuleArr[$key] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+            , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
         }
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_GROUP_DEVICE_ADD, $data);
             return $returnContent;
@@ -776,23 +770,23 @@ class ShakeAround
         "data": {}*/
         errorLog(json_encode($data));
         $valiRuleArr['group_id'] = array(
-            ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
+            Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
         $deviceIdentifiersValiRuleArr = array();
         $valiRuleArr['device_identifiers'] =
-            array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-            , ParamValidate::VALI_RULE_ARR => &$deviceIdentifiersValiRuleArr,
-                ParamValidate::MAX_ARR_LEN_VAR => 1000);
+            array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+            , Own_Validate::VALI_RULE_ARR => &$deviceIdentifiersValiRuleArr,
+                Own_Validate::MAX_ARR_LEN_VAR => 1000);
         foreach ($data['device_identifiers'] as $key => $device_identifier) {
-            $deviceIdentifierValiRuleArr[ParamValidate::LOGIC_OR_VAR][] =
-                array(ParamValidate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
-            $deviceIdentifierValiRuleArr['device_id'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['major'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['minor'] = array(ParamValidate::TYPE => ParamValidate::INTEGER_VAR);
-            $deviceIdentifierValiRuleArr['uuid'] = array(ParamValidate::TYPE => ParamValidate::STRING_VAR);
-            $deviceIdentifiersValiRuleArr[$key] = array(ParamValidate::TYPE => ParamValidate::ARRAY_VAR
-            , ParamValidate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
+            $deviceIdentifierValiRuleArr[Own_Validate::LOGIC_OR_VAR][] =
+                array(Own_Validate::LOGIC_OR_MULTI_VAR => 2, 'device_id', array('major', 'minor', 'uuid'));
+            $deviceIdentifierValiRuleArr['device_id'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['major'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['minor'] = array(Own_Validate::TYPE => Own_Validate::INTEGER_VAR);
+            $deviceIdentifierValiRuleArr['uuid'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+            $deviceIdentifiersValiRuleArr[$key] = array(Own_Validate::TYPE => Own_Validate::ARRAY_VAR
+            , Own_Validate::VALI_RULE_ARR => $deviceIdentifierValiRuleArr);
         }
-        $valiState = ParamValidate::validateFuncParam($data, $valiRuleArr);
+        $valiState = Own_Validate::validateFuncParam($data, $valiRuleArr);
         if ($valiState) {
             $returnContent = $this->invokeShakeInterface(self::SHAKEAROUND_DEVICE_GROUP_DEVICE_DELETE, $data);
             return $returnContent;

@@ -1,12 +1,10 @@
 <?php
-namespace Platform\Common\WXCrypt;
-
 /**
  * Prpcrypt class
  *
  * 提供接收和推送给公众平台消息的加解密接口.
  */
-class Prpcrypt
+class Weixin_Crypt_Prpcrypt
 {
     public $key;
 
@@ -32,7 +30,7 @@ class Prpcrypt
             $module = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
             $iv = substr($this->key, 0, 16);
             //使用自定义的填充方式对明文进行补位填充
-            $pkc_encoder = new PKCS7Encoder;
+            $pkc_encoder = new Weixin_Crypt_PKCS7Encoder;
             $text = $pkc_encoder->encode($text);
             mcrypt_generic_init($module, $this->key, $iv);
             //加密
@@ -42,10 +40,10 @@ class Prpcrypt
 
             //print(base64_encode($encrypted));
             //使用BASE64对加密后的字符串进行编码
-            return array(ErrorCode::$OK, base64_encode($encrypted));
+            return array(Weixin_Crypt_ErrorCode::$OK, base64_encode($encrypted));
         } catch (\Exception $e) {
             //print $e;
-            return array(ErrorCode::$EncryptAESError, null);
+            return array(Weixin_Crypt_ErrorCode::$EncryptAESError, null);
         }
     }
 
@@ -68,11 +66,11 @@ class Prpcrypt
             mcrypt_generic_deinit($module);
             mcrypt_module_close($module);
         } catch (\Exception $e) {
-            return array(ErrorCode::$DecryptAESError, null);
+            return array(Weixin_Crypt_ErrorCode::$DecryptAESError, null);
         }
         try {
             //去除补位字符
-            $pkc_encoder = new PKCS7Encoder;
+            $pkc_encoder = new Weixin_Crypt_PKCS7Encoder;
             $result = $pkc_encoder->decode($decrypted);
             //去除16位随机字符串,网络字节序和AppId
             if (strlen($result) < 16)
@@ -84,10 +82,10 @@ class Prpcrypt
             $from_appid = substr($content, $xml_len + 4);
         } catch (\Exception $e) {
             //print $e;
-            return array(ErrorCode::$IllegalBuffer, null);
+            return array(Weixin_Crypt_ErrorCode::$IllegalBuffer, null);
         }
         if ($from_appid != $appid)
-            return array(ErrorCode::$ValidateAppidError, null);
+            return array(Weixin_Crypt_ErrorCode::$ValidateAppidError, null);
         return array(0, $xml_content);
 
     }

@@ -1,6 +1,4 @@
 <?php
-namespace Platform\Common;
-load('Platform.WXOpenplatform');
 
 /**
  * Created by PhpStorm.
@@ -8,7 +6,7 @@ load('Platform.WXOpenplatform');
  * Date: 15-11-28
  * Time: 下午12:14
  */
-class WXDailyTask
+class Weixin_DailyTask
 {
 
     /**
@@ -17,33 +15,36 @@ class WXDailyTask
      */
     public function remainEffectiveAuthorizerRefreshToken()
     {
+        $appid = C('APP_ID');
         $successNum = 0;
         $failNum = 0;
-        $AuthorizerRefreshTokenModel = M('AccountAuthorizerInfo');
         $refresh_time = time() + 5 * 24 * 60 * 60;
-        $map['componentappid'] = C('APP_ID');
-        $map['authorizer_refresh_token_vld_timestamp'] = array('lt', $refresh_time);
-        $authorizerList = $AuthorizerRefreshTokenModel->field('authorizerappid,authorizer_refresh_token,authorizer_refresh_token_vld_timestamp')
-            ->where($map)->select();
+        $whereAccounts['componentappid'] = $appid;
+        $whereAccounts['authorizer_refresh_token_vld_timestamp'] = array('lt', $refresh_time);
+        $accountAuthInfoModel = new Weixin_AccountAuthInfoModel(); // 实例化AccountAuthorizerInfo对象
+        $authorizerList = $accountAuthInfoModel
+            ->findMultiAccount($whereAccounts,
+                'authorizerappid,authorizer_refresh_token,authorizer_refresh_token_vld_timestamp');
         foreach ($authorizerList as $authorizer) {
             //用来刷新refresh_token
-            $appid = C('APP_ID');
             $authorizerAppid = $authorizer['authorizerappid'];
             $authorizer_refresh_token = $authorizer['authorizer_refresh_token'];
             $postData = "{\"component_appid\":\"{$appid}\",\"authorizer_appid\":\"{$authorizerAppid}\",\"authorizer_refresh_token\":\"{$authorizer_refresh_token}\"}";
             $component_access_token = getComponent_Access_Token();
             $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=' . $component_access_token;
-            $reponseDataAtt = requestWXServer($postUrl, $postData);
-            if ($reponseDataAtt) {
+            $authInfo = requestWXServer($postUrl, $postData);
+            if ($authInfo) {
                 $successNum++;
-                $reponseDataAtt['authorizer_access_token_vld_timestamp'] = time() + 7000;
-                $reponseDataAtt['authorizer_refresh_token_vld_timestamp'] = time() + 29 * 24 * 3600;
-                $accountauthorizerinfo = M("AccountAuthorizerInfo"); // 实例化AccountAuthorizerInfo对象
+                unset($authInfo['expires_in']);
+                $authInfo['authorizer_access_token_vld_timestamp'] = time() + 7000;
+                $authInfo['authorizer_refresh_token_vld_timestamp'] = time() + 29 * 24 * 3600;
                 $whereAuthorizer['authorizerappid'] = $authorizerAppid;
-                $whereAuthorizer['componentappid'] = C('APP_ID');
-                $saveState = $accountauthorizerinfo->where($whereAuthorizer)->field('authorizer_access_token,authorizer_refresh_token,authorizer_access_token_vld_timestamp,authorizer_refresh_token_vld_timestamp')->save($reponseDataAtt); // 根据条件更新记录
+                $whereAuthorizer['componentappid'] = $appid;
+                $saveState = $accountAuthInfoModel
+                    ->updateAccount($authInfo, $whereAuthorizer); // 根据条件更新记录
                 if ($saveState === false) {
-                    $saveState = $accountauthorizerinfo->where($whereAuthorizer)->field('authorizer_access_token,authorizer_refresh_token,authorizer_access_token_vld_timestamp,authorizer_refresh_token_vld_timestamp')->save($reponseDataAtt); // 根据条件更新记录
+                    $saveState = $accountAuthInfoModel
+                        ->updateAccount($authInfo, $whereAuthorizer); // 根据条件更新记录
                     if ($saveState === false) {
                         errorLog(__FUNCTION__ . '获取失败', -3, true);
                         $failNum++;
@@ -55,7 +56,7 @@ class WXDailyTask
             }
         }
         if ($failNum != 0) {
-            errorLog($failNum.'个公众号刷新口令更新失败', -3, true);
+            errorLog($failNum . '个公众号刷新口令更新失败', -3, true);
             return false;
         }
         echo true;

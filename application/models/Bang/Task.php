@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: root
@@ -7,6 +8,8 @@
  */
 class Bang_TaskModel
 {
+    private $tableName = 'think_bangbang_task';
+
     /**
      * @return array
      */
@@ -26,11 +29,13 @@ class Bang_TaskModel
     function findTask($findInfo)
     {
         $taskDb = new Db_Mysql();
-        return $taskDb->get_row('think_bangbang_task', $findInfo);
+        return $taskDb->get_row($this->tableName, $findInfo);
     }
-    function addTask($taskInfo){
+
+    function addTask($taskInfo)
+    {
         $taskDb = new Db_Mysql();
-        return $taskDb->insert('think_bangbang_task', $taskInfo);
+        return $taskDb->insert($this->tableName, $taskInfo);
     }
 
 }

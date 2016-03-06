@@ -10,8 +10,12 @@ abstract class Own_Controller_Base extends Yaf_Controller_Abstract
 {
     function init()
     {
-        $viewPath = $this->getViewpath();
-        $this->getView()->setScriptPath(($viewPath[0]) . $this->getModuleName() . '/');
+        if (!function_exists('saeAutoLoader')) {// 自动识别SAE环境
+            $viewPath = $this->getViewpath();
+            $this->getView()->setScriptPath(($viewPath[0]) . $this->getModuleName() . '/');
+        } else {
+            $this->getView()->setScriptPath((APPLICATION_PATH . '/application/views/') . $this->getModuleName());
+        }
     }
 
     function assign($name, $value)
@@ -19,30 +23,11 @@ abstract class Own_Controller_Base extends Yaf_Controller_Abstract
         $this->getView()->assign($name, $value);
     }
 
-    /**
-     * session的value值只允许string，int，
-     * 不允许array，本方法以此判断是否为设置值或者取值，
-     * 如果为array，且为空数组，则直接返回已有的值，
-     * 如果为数组且不为空，则抛出异常。
-     * @param $name
-     * @param array $value
-     * @return bool|mixed|Yaf_Session
-     * @throws \Yaf\Exception
-     */
-    function session($name, $value = array())
-    {
-        $sessionObj = Yaf_Session::getInstance();
-        if (is_string($value) || is_numeric($value)) {
-            return $sessionObj->set($name, $value);
-        } else if (is_array($value) && !$value) {
-            return $sessionObj->get($name);
-        }
-        throw new \Yaf\Exception('Invalid session value!');
-    }
 
     /**
      * 统一获取参数，get、post等
      * @param $paramName string
+     * @return mixed
      */
     function getParam($paramName)
     {

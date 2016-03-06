@@ -1,32 +1,18 @@
 <?php
-namespace Platform\Controller;
 
-use Common\Common\AsyncTaskManager;
-use Platform\Common\WXShakeAround\ShakeAround;
-use Think\Controller;
-use WXShake\Common\ShakePlatform;
-
-load('@.WXOpenplatform');
-
-class WXAuthorizeController extends Controller
+class Wexin_AuthorizeController extends Own_Controller_Base
 {
-    public function index()
+    public function indexAction()
     {
-        $this->display();
-    }
-
-    public function _empty()
-    {
-        //定义一个默认行为，当用户输入的action不存在时
     }
 
     /**
      *公众号授权时访问此链接，公众号管理员输入账号密码后会跳转到下面的redirect里面，表示授权成功！
      */
-    public function authorize()
+    public function authorizeAction()
     {
         $preAuthcode = getPreAuthCode();
-        $redirect_uri = U('Platform/WXAuthorize/authorizeSuccess', '', false, true);
+        $redirect_uri = U('/Weixin/Authorize/authorizeSuccess/');
         $getParamArr['component_appid'] = C('APP_ID');
         $getParamArr['pre_auth_code'] = $preAuthcode;
         $getParamArr['redirect_uri'] = $redirect_uri;
@@ -37,7 +23,7 @@ class WXAuthorizeController extends Controller
     /**
      *授权成功时会回调到此页面
      */
-    public function authorizeSuccess()
+    public function authorizeSuccessAction()
     {
         $authInfo = getAuthInfoByAuthCode($_GET['auth_code']);
         if ($authInfo) {
@@ -45,31 +31,31 @@ class WXAuthorizeController extends Controller
             $createTableState = $this->createDataBaseTable($authAppId);
             if ($createTableState) {
                 //数据表创建成功以后，同步数据（当前同步摇一摇数据）
-                AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
+                Own_AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
                     'syncDeviceList', array(), 20, 5, '同步摇一摇设备数据', array('authorizedAppId' => $authAppId));
-                AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
+                Own_AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
                     'syncPageList', array(), 20, 5, '同步摇一摇页面数据', array('authorizedAppId' => $authAppId));
-                AsyncTaskManager::addAsyncTask('Platform\Common\WXStoreManage\StoreManage',
+                Own_AsyncTaskManager::addAsyncTask('Platform\Common\WXStoreManage\StoreManage',
                     'syncPoiList', array(), 20, 5, '同步门店数据', array('authorizedAppId' => $authAppId));
             }
             header("Content-Type: text/html; charset=utf-8");
             echo '您的摇一摇授权已成功！谢谢您！';
         } else {
-            Controller::redirect('WXAuthorizeController/authorize');
+            $this->redirect('/Weixin/Authorize/authorize');
         }
     }
 
-    public function test()
+    public function testAction()
     {
         $authAppId = 'wxc0dfd0ee0eb3a26b';
         $createTableState = $this->createDataBaseTable($authAppId);
         if ($createTableState) {
             //数据表创建成功以后，同步数据（当前同步摇一摇数据）
-            AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
+            Own_AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
                 'syncDeviceList', array(), 20, 5, '同步摇一摇设备数据', array('authorizedAppId' => $authAppId));
-            AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
+            Own_AsyncTaskManager::addAsyncTask('WXShake\Common\ShakePlatform',
                 'syncPageList', array(), 20, 5, '同步摇一摇设备数据', array('authorizedAppId' => $authAppId));
-            AsyncTaskManager::addAsyncTask('Platform\Common\WXStoreManage\StoreManage',
+            Own_AsyncTaskManager::addAsyncTask('Platform\Common\WXStoreManage\StoreManage',
                 'syncPoiList', array(), 20, 5, '同步门店数据', array('authorizedAppId' => $authAppId));
         }
         header("Content-Type: text/html; charset=utf-8");
@@ -180,8 +166,8 @@ CREATE TABLE IF NOT EXISTS `think_{$serverName}_poi` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 DB;
         ///
-        $wxShakeModel = new \Think\Model();
-        $wxShakeModel->startTrans(); // 启动事务
+        $wxShakeModel = new Db_Mysql();
+        $wxShakeModel->startTransAction(); // 启动事务
         $executeState = true;
         foreach ($tableSqlArr as $key => $value) {
             $executeState = $wxShakeModel->execute($value);
@@ -190,11 +176,11 @@ DB;
             }
         }
         if ($executeState !== false) {
-            $wxShakeModel->commit(); // 提交事务
+            $wxShakeModel->commitAction(); // 提交事务
             return true;
         } else {
             errorLog("授权失败！", -3, true);
-            $wxShakeModel->rollback();
+            $wxShakeModel->rollbackAction();
             return false;
         }
     }

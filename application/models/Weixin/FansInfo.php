@@ -1,10 +1,9 @@
 <?php
 
-class Weixin_FansTokenModel
+class Weixin_FansInfoModel
 {
-    private $tableName = 'think_o_auth_fans_token';
+    private $tableName = 'think_fans_info';
     private $fansDb;
-
 
     /**
      * Weixin_AccountAuthInfoModel constructor.

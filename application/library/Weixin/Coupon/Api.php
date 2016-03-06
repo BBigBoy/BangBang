@@ -1,5 +1,5 @@
 <?php
-class WXCouponApi
+class Weixin_Coupon_Api
 {
     const API_BASE_URL_PREFIX = 'https://api.weixin.qq.com';
     const LOGO_UPLOAD = '/cgi-bin/media/uploadimg?'; //以下API接口URL需要使用此前缀

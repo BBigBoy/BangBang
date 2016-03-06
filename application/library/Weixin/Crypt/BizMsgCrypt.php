@@ -1,16 +1,15 @@
 <?php
-namespace Platform\Common\WXCrypt;
-    /**
-     * 对开放平台发送给开放账号的消息加解密示例代码.
-     *
-     * @copyright Copyright (c) 1998-2014 Tencent Inc.
-     */
+/**
+ * 对开放平台发送给开放账号的消息加解密示例代码.
+ *
+ * @copyright Copyright (c) 1998-2014 Tencent Inc.
+ */
 
 /**
  * 1.第三方回复加密消息给开放平台；
  * 2.第三方收到开放平台发送的消息，验证消息的安全性，并对消息进行解密。
  */
-class WXBizMsgCrypt
+class Weixin_Crypt_BizMsgCrypt
 {
     private $token;
     private $encodingAesKey;
@@ -62,7 +61,7 @@ class WXBizMsgCrypt
      */
     public function encryptMsg($replyMsg, $timeStamp, $nonce, &$encryptMsg)
     {
-        $pc = new Prpcrypt($this->encodingAesKey);
+        $pc = new Weixin_Crypt_Prpcrypt($this->encodingAesKey);
         // 加密
         $array = $pc->encrypt($replyMsg, $this->appId);
         $ret = $array[0];
@@ -83,9 +82,9 @@ class WXBizMsgCrypt
         }
         $signature = $array[1];
         // 生成发送的xml
-        $xmlparse = new XMLParse;
+        $xmlparse = new Weixin_Crypt_XMLParse;
         $encryptMsg = $xmlparse->generate($encrypt, $signature, $timeStamp, $nonce);
-        return ErrorCode::$OK;
+        return Weixin_Crypt_ErrorCode::$OK;
     }
 
     /**
@@ -107,12 +106,12 @@ class WXBizMsgCrypt
     public function decryptMsg($msgSignature, $timestamp = null, $nonce, $postData, &$msg, $elementName = 'ToUserName')
     {
         if (strlen($this->encodingAesKey) != 43) {
-            return ErrorCode::$IllegalAesKey;
+            return Weixin_Crypt_ErrorCode::$IllegalAesKey;
         }
 
-        $pc = new Prpcrypt($this->encodingAesKey);
+        $pc = new Weixin_Crypt_Prpcrypt($this->encodingAesKey);
         // 提取密文
-        $xmlparse = new XMLParse;
+        $xmlparse = new Weixin_Crypt_XMLParse;
         $array = $xmlparse->extract($postData, $elementName);
         $ret = $array[0];
 
@@ -137,7 +136,7 @@ class WXBizMsgCrypt
 
         $signature = $array[1];
         if ($signature != $msgSignature) {
-            return ErrorCode::$ValidateSignatureError;
+            return Weixin_Crypt_ErrorCode::$ValidateSignatureError;
         }
         $result = $pc->decrypt($encrypt, $this->appId);
         if ($result[0] != 0) {
@@ -145,7 +144,7 @@ class WXBizMsgCrypt
         }
 
         $msg = $result[1];
-        return ErrorCode::$OK;
+        return Weixin_Crypt_ErrorCode::$OK;
     }
 }
 

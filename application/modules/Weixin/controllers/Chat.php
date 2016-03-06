@@ -1,24 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: BigBigBoy
- * Date: 2015/7/7
- * Time: 17:52
- */
 
-namespace Platform\Controller;
-
-use Platform\Common\WXChat\WeChat;
-use Platform\Common\WXChat\UserManage;
-use Platform\Common\WXCrypt\WXBizMsgCrypt;
-use Think\Controller;
-load('@.WXOpenplatform');
-
-/**
- * Class WeChatController
- * @package Platform\Controller
- */
-class WeChatController extends Controller
+class Wexin_ChatController extends Own_Controller_Base
 {
     /**
      *作为开放平台，微信会把授权给开放平台的公众号事件推送到本控制其对应的操作，如：wx477688baf3a4a9f6callback

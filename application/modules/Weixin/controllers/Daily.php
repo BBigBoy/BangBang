@@ -1,18 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: BigBigBoy
- * Date: 2015/7/18
- * Time: 22:54
- */
-//Deprecated
-namespace Platform\Controller;
 
-use Think\Controller;
-
-load('Platform.WXOpenplatform');
-
-class DailyController extends Controller
+class Wexin_DailyController extends Own_Controller_Base
 {
 
     /**

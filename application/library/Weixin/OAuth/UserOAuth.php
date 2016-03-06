@@ -1,22 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: BigBigBoy
- * Date: 2015/7/9
- * Time: 9:12
- */
-
-namespace Platform\Common\WXOAuth;
-
-use Platform\Common\WXShakeAround\ShakeAround;
-
-load('Platform.WXOpenplatform');
 
 /**
  * Class UserOAuth
  * @package Platform\Common\WXOAuth
  */
-abstract class UserOAuth
+abstract class Weixin_OAuth_UserOAuth
 {
     /**
      *用户登录，创建会话，记录登录信息。
@@ -51,7 +39,7 @@ abstract class UserOAuth
             $loginRoad = 'cookie';
         } elseif (I('get.ticket')) {
             //用户摇一摇时将通过本条件
-            $shakeAround = ShakeAround::getInstance($authAppId);
+            $shakeAround = Weixin_ShakeAround_ShakeAround::getInstance($authAppId);
             $userShakeInfo = $shakeAround->getUserShakeInfo(I('get.ticket'));
             if ($userShakeInfo['data']['openid']) {
                 $openid = $userShakeInfo['data']['openid'];
@@ -97,7 +85,7 @@ abstract class UserOAuth
             if (!$userInfo) {
                 //如果第三方应用没有该用户信息，则检测平台是否拥有该用户的信息
                 //如果平台也没有该用户信息，则发起网页授权认证
-                $userInfo = UserOAuth::loginUserInfo($openid);
+                $userInfo = Weixin_OAuth_UserOAuth::loginUserInfo($openid);
                 if ($userInfo) {
                     $this->firstLogin($userInfo);
                 } else {
@@ -110,7 +98,7 @@ abstract class UserOAuth
         if (!isset($userInfo['openid'])) {
             $userInfo['openid'] = $openid;
         }
-        $userInfo['road']=$loginRoad;
+        $userInfo['road'] = $loginRoad;
         //登陆成功
         $this->loginSuccess($userInfo);
         cookie($authAppId . 'openid', $openid);
@@ -190,10 +178,18 @@ abstract class UserOAuth
         if (S($openid . 'forLoginUserInfo')) {
             return json_decode(S($openid . 'forLoginUserInfo'), true);
         }
-        $fansModel = M('FansInfo');
-        $fields = array("nickname", "sex", "province", "city", 'country', 'headimgurl', 'openid', 'get_timestamp');
+        $fields = array(
+            "nickname",
+            "sex",
+            "province",
+            "city",
+            'country',
+            'headimgurl',
+            'openid',
+            'get_timestamp');
         $whereFans['openid'] = $openid;
-        $fansInfo = $fansModel->field($fields)->where($whereFans)->find();
+        $fansModel = new Weixin_FansInfoModel();
+        $fansInfo = $fansModel->findFans($whereFans, implode(',', $fields));
         return $fansInfo;
     }
 

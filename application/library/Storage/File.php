@@ -1,18 +1,6 @@
 <?php
-// +----------------------------------------------------------------------
-// | TOPThink [ WE CAN DO IT JUST THINK ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2013 http://topthink.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: liu21st <liu21st@gmail.com>
-// +----------------------------------------------------------------------
-namespace Think\Storage\Driver;
-use Think\Storage;
+class Storage_File extends Storage_Base{
 // 本地文件写入存储类
-class File extends Storage{
-
     private $contents=array();
 
     /**
@@ -35,9 +23,11 @@ class File extends Storage{
     /**
      * 文件写入
      * @access public
-     * @param string $filename  文件名
-     * @param string $content  文件内容
-     * @return boolean         
+     * @param string $filename 文件名
+     * @param string $content 文件内容
+     * @param string $type
+     * @return bool
+     * @throws Exception
      */
     public function put($filename,$content,$type=''){
         $dir         =  dirname($filename);
@@ -45,7 +35,7 @@ class File extends Storage{
             mkdir($dir,0777,true);
         }
         if(false === file_put_contents($filename,$content)){
-            E(L('_STORAGE_WRITE_ERROR_').':'.$filename);
+            throw new Exception('_STORAGE_WRITE_ERROR_:'.$filename);
         }else{
             $this->contents[$filename]=$content;
             return true;
@@ -69,9 +59,8 @@ class File extends Storage{
     /**
      * 加载文件
      * @access public
-     * @param string $filename  文件名
-     * @param array $vars  传入变量
-     * @return void        
+     * @param $_filename string 文件名
+     * @param array $vars 传入变量
      */
     public function load($_filename,$vars=null){
         if(!is_null($vars)){

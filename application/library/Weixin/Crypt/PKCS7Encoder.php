@@ -1,12 +1,10 @@
 <?php
-namespace Platform\Common\WXCrypt;
-
 /**
  * PKCS7Encoder class
  *
  * 提供基于PKCS7算法的加解密接口.
  */
-class PKCS7Encoder
+class Weixin_Crypt_PKCS7Encoder
 {
     public static $block_size = 32;
 
@@ -17,12 +15,12 @@ class PKCS7Encoder
      */
     function encode($text)
     {
-        $block_size = PKCS7Encoder::$block_size;
+        $block_size = self::$block_size;
         $text_length = strlen($text);
         //计算需要填充的位数
-        $amount_to_pad = PKCS7Encoder::$block_size - ($text_length % PKCS7Encoder::$block_size);
+        $amount_to_pad = self::$block_size - ($text_length % self::$block_size);
         if ($amount_to_pad == 0) {
-            $amount_to_pad = PKCS7Encoder::$block_size;
+            $amount_to_pad = self::$block_size;
         }
         //获得补位所用的字符
         $pad_chr = chr($amount_to_pad);

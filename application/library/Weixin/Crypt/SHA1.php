@@ -4,7 +4,7 @@
  *
  * 计算公众平台的消息签名接口.
  */
-class SHA1
+class Weixin_Crypt_SHA1
 {
     /**
      * 用SHA1算法生成安全签名
@@ -21,10 +21,10 @@ class SHA1
             $array = array($encrypt_msg, $token, $timestamp, $nonce);
             sort($array, SORT_STRING);
             $str = implode($array);
-            return array(ErrorCode::$OK, sha1($str));
+            return array(Weixin_Crypt_ErrorCode::$OK, sha1($str));
         } catch (\Exception $e) {
             //print $e . "\n";
-            return array(ErrorCode::$ComputeSignatureError, null);
+            return array(Weixin_Crypt_ErrorCode::$ComputeSignatureError, null);
         }
     }
 

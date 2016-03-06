@@ -1,5 +1,4 @@
 <?php
-namespace Platform\Common\WXCrypt;
 /**
  * error code 说明.
  * <ul>
@@ -16,7 +15,7 @@ namespace Platform\Common\WXCrypt;
  *    <li>-40011: 生成xml失败</li>
  * </ul>
  */
-class ErrorCode
+class Weixin_Crypt_ErrorCode
 {
 	public static $OK = 0;
 	public static $ValidateSignatureError = -40001;
