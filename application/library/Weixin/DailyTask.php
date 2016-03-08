@@ -41,10 +41,10 @@ class Weixin_DailyTask
                 $whereAuthorizer['authorizerappid'] = $authorizerAppid;
                 $whereAuthorizer['componentappid'] = $appid;
                 $saveState = $accountAuthInfoModel
-                    ->updateAccount($authInfo, $whereAuthorizer); // 根据条件更新记录
+                    ->updateAccount($whereAuthorizer, $authInfo); // 根据条件更新记录
                 if ($saveState === false) {
                     $saveState = $accountAuthInfoModel
-                        ->updateAccount($authInfo, $whereAuthorizer); // 根据条件更新记录
+                        ->updateAccount($whereAuthorizer, $authInfo); // 根据条件更新记录
                     if ($saveState === false) {
                         errorLog(__FUNCTION__ . '获取失败', -3, true);
                         $failNum++;

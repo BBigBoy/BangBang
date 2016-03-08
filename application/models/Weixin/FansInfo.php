@@ -1,31 +1,29 @@
 <?php
 
-class Weixin_FansInfoModel
+class Weixin_FansInfoModel extends \Illuminate\Database\Eloquent\Model
 {
-    private $tableName = 'think_fans_info';
-    private $fansDb;
+    public $timestamps = false;
+    protected $table = 'think_fans_info';
 
-    /**
-     * Weixin_AccountAuthInfoModel constructor.
-     */
-    public function __construct()
-    {
-        $this->fansDb = new Db_Mysql();
-    }
 
     function findFans($whereFans, $fields = '*')
     {
-        return $this->fansDb->get_row($this->tableName, $whereFans, $fields);
+        return $this::where($whereFans)->select($fields)->first();
+    }
+
+    function findMultiFans($whereFans, $fields = '*')
+    {
+        return $this::where($whereFans)->select($fields)->get();
     }
 
     function updateFans($whereFans, $fansInfo)
     {
-        return $this->fansDb->update($this->tableName, $fansInfo, $whereFans);
+        return $this::update($whereFans, $fansInfo);
     }
 
     function addFans($fansInfo)
     {
-        return $this->fansDb->insert($this->tableName, $fansInfo);
+        return $this::insert($fansInfo);
     }
 
 }

@@ -1,19 +1,19 @@
 <?php
 
-class Wexin_ChatController extends Own_Controller_Base
+class ChatController extends Own_Controller_Base
 {
     /**
-     *作为开放平台，微信会把授权给开放平台的公众号事件推送到本控制其对应的操作，如：wx477688baf3a4a9f6callback
+     *作为开放平台，微信会把授权给开放平台的公众号事件推送到本控制其对应的操作
      * 为了避免过多的操作方法，统一由这个空操作处理
      */
-    public function _empty()
+    public function callback()
     {
-        $auth_app_id = substr(ACTION_NAME, 0, strlen(ACTION_NAME) - 8);
-        $msg_signature = I('get.msg_signature');
-        $timeStamp = I('get.timestamp');
-        $nonce = I('get.nonce');
+        $auth_app_id = getParam('get.appid');
+        $msg_signature = getParam('get.msg_signature');
+        $timeStamp = getParam('get.timestamp');
+        $nonce = getParam('get.nonce');
         $postStr = file_get_contents("php://input");
-        $pc = new WXBizMsgCrypt(C('TOKEN'), C('ENCODING_AES_KEY'), C('APP_ID'));
+        $pc = new Weixin_Crypt_BizMsgCrypt(C('TOKEN'), C('ENCODING_AES_KEY'), C('APP_ID'));
         $msg = '';
         $errCode = $pc->decryptMsg($msg_signature, $timeStamp, $nonce, $postStr, $msg, 'AppId');
         if ($errCode === 0) {
@@ -49,7 +49,7 @@ class Wexin_ChatController extends Own_Controller_Base
      */
     private function dealWXVerify($wxPushArr)
     {
-        $myWeChatObj = new WeChat(array());
+        $myWeChatObj = new Weixin_Chat_WeChat(array());
         if ($wxPushArr['MsgType'] == 'event') {
             $myWeChatObj->text($wxPushArr['Event'] . 'from_callback')->reply();
         } elseif ($wxPushArr['MsgType'] == 'text') {
@@ -78,7 +78,7 @@ class Wexin_ChatController extends Own_Controller_Base
     private function updateShakeDisplayNum($auth_app_id, $xmlObj)
     {
         $shakeInfo = (array)$xmlObj;
-        $deviceExtraModel = M($auth_app_id . 'ShakeDeviceExtra');
+        $deviceExtraModel = new Weixin_Shake_DeviceExtraModel($auth_app_id);
         $aroundBeacons = (array)$shakeInfo['AroundBeacons'];
         if (count($aroundBeacons['AroundBeacon']) > 1) {
             $aroundBeacons['AroundBeacon'] = (array)$aroundBeacons['AroundBeacon'];
@@ -90,7 +90,7 @@ class Wexin_ChatController extends Own_Controller_Base
                 $aroundBeacon = (array)$aroundBeacon;
                 $condition['major'] = (int)$aroundBeacon['Major'];
                 $condition['minor'] = (int)$aroundBeacon['Minor'];
-                $result = $deviceExtraModel->where($condition)->setInc('live_num');
+                $result = $deviceExtraModel->incLiveNum($condition);
                 if (!$result) {
                     errorLog($auth_app_id . '更新访问次数出错1' . gettype($aroundBeacon) . json_encode($aroundBeacon), -3, true);
                 }
@@ -102,23 +102,23 @@ class Wexin_ChatController extends Own_Controller_Base
         $chosenBeacon = (array)$shakeInfo['ChosenBeacon'];
         $whereDevice['major'] = $chosenBeacon['Major'];
         $whereDevice['minor'] = $chosenBeacon['Minor'];
-        $visitDevice['visit_num'] = array('exp', '`visit_num`+1');
-        $visitDevice['live_num'] = array('exp', '`live_num`+1');
-        $result = $deviceExtraModel->where($whereDevice)->save($visitDevice);
+        $visitDevice['`visit_num`'] = array('exp', '`visit_num`+1');
+        $visitDevice['`live_num`'] = array('exp', '`live_num`+1');
+        $result = $deviceExtraModel->updateDeviceExtra($whereDevice, $visitDevice);
         //!$result包含两层意思，一个是访问数据库出错，另一个是更新的记录数为0
         //因为默认只要创建了设备，这张表里面一定存在该设备相关信息
         if (!$result) {
             errorLog($auth_app_id . '更新访问次数出错2' . json_encode($shakeInfo['ChosenBeacon']), -3, true);
         }
 
-        $deviceModel = M($auth_app_id . 'ShakeDevice');
-        $deviceInfo = $deviceModel->where($whereDevice)->field('page_ids')->find();
+        $deviceModel = new Weixin_Shake_DeviceModel($auth_app_id);
+        $deviceInfo = $deviceModel->findDevice($whereDevice, 'page_ids');
         if ($deviceInfo['page_ids']) {
-            $pageIdsStr = trim($deviceInfo['page_ids'], ',');
-            $shakePageModel = M($auth_app_id . 'ShakePageExtra');
-            $result = $shakePageModel->where(array('page_id' => array('in', $pageIdsStr)))->setInc('display_num');
+            $pageIdAtt = explode(',', $deviceInfo['page_ids']);
+            $shakePageModel = new Weixin_Shake_PageExtraModel($auth_app_id);
+            $result = $shakePageModel->incDisplayNum($pageIdAtt);
             if ($result === false) {
-                errorLog($auth_app_id . '更新访问次数出错3pageId-->' . $pageIdsStr, -3, true);
+                errorLog($auth_app_id . '更新访问次数出错3pageId-->' . $pageIdAtt, -3, true);
             }
         }
         exit('');
@@ -131,12 +131,12 @@ class Wexin_ChatController extends Own_Controller_Base
      */
     private function saveSubscribeUserInfo($auth_app_id, $fromUserName)
     {
-        $userManager = new UserManage();
+        $userManager = new Weixin_Chat_UserManage();
         $userInfo = $userManager->getUserInfo($auth_app_id, $fromUserName);
         $userInfo['authorizerappid'] = $auth_app_id;
         $userInfo['componentappid'] = C('APP_ID');
-        $focusFansInfo = M('FocusFansInfo');
-        $focusFansInfo->add($userInfo);
+        $focusFansInfo = new Weixin_FansInfoModel();
+        $focusFansInfo->addFans($userInfo);
     }
 
     /**
@@ -158,9 +158,9 @@ class Wexin_ChatController extends Own_Controller_Base
          $where['openid'] = $fromUserName;
          $userInfo = $focusFansInfo->where($where)->field($field)->find();
          */
-        $userManager = new UserManage();
-        $userInfo = $userManager->getUserInfo($auth_app_id, $fromUserName);
-        if ($barrage['barrage_text']) {
+        $userManager = new Weixin_Chat_UserManage();
+        $userManager->getUserInfo($auth_app_id, $fromUserName);
+        /*if ($barrage['barrage_text']) {
             $barrage['openid'] = $fromUserName;
             $barrage['head_image'] = $userInfo['headimgurl'];
             $barrage['nick_name'] = $userInfo['nickname'];
@@ -169,6 +169,6 @@ class Wexin_ChatController extends Own_Controller_Base
             $barrageTextModel = M('BarrageText');
             $barrageTextModel->add($barrage);
             S('last_update_time', time(), 7200);
-        }
+        }*/
     }
 }

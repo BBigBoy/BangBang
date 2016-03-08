@@ -1,38 +1,34 @@
 <?php
 
-class Weixin_AccountAuthInfoModel
+class Weixin_AccountAuthInfoModel extends \Illuminate\Database\Eloquent\Model
 {
-    private $tableName = 'think_account_authorizer_info';
-    private $accountDb;
+    public $timestamps = false;
+    protected $table = 'think_account_authorizer_info';
 
-
-    /**
-     * Weixin_AccountAuthInfoModel constructor.
-     */
-    public function __construct()
+    function delAccount($whereAccount)
     {
-        $this->accountDb = new Db_Mysql();
+        return $this::where($whereAccount)->delete();
     }
 
     function findAccount($whereAccount, $fields = '*')
     {
-        return $this->accountDb->get_row($this->tableName, $whereAccount, $fields);
+        return $this::where($whereAccount)->select($fields)->first();
     }
 
     function findMultiAccount($whereAccount, $fields = '*')
     {
-        return $this->accountDb->get_all($this->tableName, $whereAccount, $fields);
+        return $this::where($whereAccount)->select($fields)->get();
     }
 
 
-    function updateAccount($updateInfo, $whereAccount)
+    function updateAccount($whereAccount, $updateInfo)
     {
-        return $this->accountDb->update($this->tableName, $updateInfo, $whereAccount);
+        return $this::update($whereAccount, $updateInfo);
     }
 
     function addAccount($accountInfo)
     {
-        return $this->accountDb->update($this->tableName, $accountInfo);
+        return $this::insert($accountInfo);
     }
 
 }

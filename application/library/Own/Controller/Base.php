@@ -23,21 +23,4 @@ abstract class Own_Controller_Base extends Yaf_Controller_Abstract
         $this->getView()->assign($name, $value);
     }
 
-
-    /**
-     * 统一获取参数，get、post等
-     * @param $paramName string
-     * @return mixed
-     */
-    function getParam($paramName)
-    {
-        $arr = explode('.', $paramName);
-        if ($arr[0] = 'post') {
-            return $this->getRequest()->getPost($arr[1] ?: NULL);
-        } elseif ($arr[0] = 'get') {
-            return $this->getRequest()->getQuery($arr[1] ?: NULL);
-        } else {
-            return $this->getRequest()->get($paramName);
-        }
-    }
 }

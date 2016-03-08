@@ -13,10 +13,6 @@ class IndexController extends Own_Controller_Base
 
     public function indexAction()
     {
-        new SampleModel();
-        echo '<pre>';
-        var_dump($_SERVER);
-        return false;
     }
 
     /**
@@ -39,7 +35,7 @@ class IndexController extends Own_Controller_Base
      */
     public function getAction()
     {
-        $taskAtt = (new Bang_TaskModel())->getTasks();;
+        $taskAtt = (new Bang_TaskModel())->getTasks();
         $this->assign("task_categorys", self::$TASK_CATEGORY);
         $this->assign("tasks", $taskAtt);
     }
@@ -91,7 +87,7 @@ class IndexController extends Own_Controller_Base
         $returnMsg['errMsg'] = 'ok';
         $valiRuleArr['tel'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::FORMAT => Own_Validate::MOBILE_FORMAT);
         $valiRuleArr['name'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MIN_LEN => 1);
-        $valiResult = Own_Validate::validateFuncParam($this->getParam('post.'), $valiRuleArr);
+        $valiResult = Own_Validate::validateFuncParam(getParam('post.'), $valiRuleArr);
         if (!$valiResult) {
             $returnMsg['errCode'] = -3;
             $returnMsg['errMsg'] = 'Data is not legitimate!';
@@ -103,9 +99,9 @@ class IndexController extends Own_Controller_Base
             $userInfo['openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';// session('openid');
             $findUserInfo = $userModle->findUser($userInfo);
             if (!$findUserInfo) {
-                $userInfo['name'] = $this->getParam('post.name');
+                $userInfo['name'] = getParam('post.name');
                 $userInfo['nick_name'] = session('nickname');
-                $userInfo['tel'] = $this->getParam('post.tel');
+                $userInfo['tel'] = getParam('post.tel');
                 $userInfo['level'] = 0;
                 $userInfo['last_login_time'] = time();
                 $userInfo['join_time'] = time();
@@ -216,12 +212,12 @@ class IndexController extends Own_Controller_Base
         $commonValiVars = array('category', 'category_index', 'instruction',
             'reward', 'year_end', 'month_end', 'day_end');
         $valiRuleArr['comment'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::IS_NULL => true);
-        if ($this->getParam('post.category') == '物流托运' || $this->getParam('post.category') == '帮取火车票') {
+        if (getParam('post.category') == '物流托运' || getParam('post.category') == '帮取火车票') {
             $commonValiVars[] = 'prov_goal';
             $commonValiVars[] = 'city_goal';
             $valiRuleArr['dist_goal'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::IS_NULL => true);
             $commonValiVars[] = 'area_detail_goal';
-            if ($this->getParam('post.category') == '物流托运') {
+            if (getParam('post.category') == '物流托运') {
                 $commonValiVars[] = 'prov_start';
                 $commonValiVars[] = 'city_start';
                 $valiRuleArr['dist_start'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::IS_NULL => true);
@@ -231,7 +227,7 @@ class IndexController extends Own_Controller_Base
         $valiRuleArr[Own_Validate::COMMON_VALI] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR,
             Own_Validate::MIN_LEN => 1,
             Own_Validate::COMMON_VALI_VARS => $commonValiVars);
-        $valiResult = (self::$TASK_CATEGORY[$this->getParam('post.category_index')] == $this->getParam('post.category')) && Own_Validate::validateFuncParamInner($this->getParam('post.'), $valiRuleArr);
+        $valiResult = (self::$TASK_CATEGORY[getParam('post.category_index')] == getParam('post.category')) && Own_Validate::validateFuncParamInner(getParam('post.'), $valiRuleArr);
         if (!$valiResult) {
             $returnMsg['errCode'] = -3;
             $returnMsg['errMsg'] = 'Data is not legitimate!';
@@ -241,25 +237,25 @@ class IndexController extends Own_Controller_Base
         } else {
             $taskInfo['publish_user'] = session('userId') ?: 0;
             $taskInfo['publish_user_openid'] = session('openid');
-            $taskInfo['category'] = $this->getParam('post.category_index');
-            $taskInfo['instruction'] = $this->getParam('post.instruction');
-            $taskInfo['reward'] = ((float)$this->getParam('post.reward')) * 100;
-            if ($this->getParam('post.comment')) {
-                $taskInfo['comment'] = $this->getParam('post.comment');
+            $taskInfo['category'] = getParam('post.category_index');
+            $taskInfo['instruction'] = getParam('post.instruction');
+            $taskInfo['reward'] = ((float)getParam('post.reward')) * 100;
+            if (getParam('post.comment')) {
+                $taskInfo['comment'] = getParam('post.comment');
             }
             $taskInfo['status'] = 0;
             $taskInfo['time_start'] = time();
-            $taskInfo['time_end'] = mktime(23, 59, 59, $this->getParam('post.month_end'), $this->getParam('post.day_end'), $this->getParam('post.year_end'));
-            if ($this->getParam('post.category') == '物流托运' || $this->getParam('post.category') == '帮取火车票') {
-                $taskInfo['loc_goal_province'] = $this->getParam('post.prov_goal');
-                $taskInfo['loc_goal_city'] = $this->getParam('post.city_goal');
-                $taskInfo['loc_goal_district'] = $this->getParam('post.dist_goal');
-                $taskInfo['loc_goal_description'] = $this->getParam('post.area_detail_goal');
-                if ($this->getParam('post.category') == '物流托运') {
-                    $taskInfo['loc_start_province'] = $this->getParam('post.prov_start');
-                    $taskInfo['loc_start_city'] = $this->getParam('post.city_start');
-                    $taskInfo['loc_start_district'] = $this->getParam('post.dist_start');
-                    $taskInfo['loc_start_description'] = $this->getParam('post.area_detail_start');
+            $taskInfo['time_end'] = mktime(23, 59, 59, getParam('post.month_end'), getParam('post.day_end'), getParam('post.year_end'));
+            if (getParam('post.category') == '物流托运' || getParam('post.category') == '帮取火车票') {
+                $taskInfo['loc_goal_province'] = getParam('post.prov_goal');
+                $taskInfo['loc_goal_city'] = getParam('post.city_goal');
+                $taskInfo['loc_goal_district'] = getParam('post.dist_goal');
+                $taskInfo['loc_goal_description'] = getParam('post.area_detail_goal');
+                if (getParam('post.category') == '物流托运') {
+                    $taskInfo['loc_start_province'] = getParam('post.prov_start');
+                    $taskInfo['loc_start_city'] = getParam('post.city_start');
+                    $taskInfo['loc_start_district'] = getParam('post.dist_start');
+                    $taskInfo['loc_start_description'] = getParam('post.area_detail_start');
                 }
             }
             $addState = (new Bang_TaskModel())->addTask($taskInfo);
@@ -290,7 +286,7 @@ class IndexController extends Own_Controller_Base
         $valiRuleArr['personalized_signature'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
         $valiRuleArr['email'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::FORMAT => Own_Validate::EMAIL_FORMAT);
         $valiRuleArr['tel'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::FORMAT => Own_Validate::MOBILE_FORMAT);
-        $valiResult = Own_Validate::validateFuncParam($this->getParam('post.'), $valiRuleArr);
+        $valiResult = Own_Validate::validateFuncParam(getParam('post.'), $valiRuleArr);
         if (!$valiResult) {
             $returnMsg['errCode'] = -3;
             $returnMsg['errMsg'] = 'Data is not legitimate!';
@@ -305,11 +301,11 @@ class IndexController extends Own_Controller_Base
                 $returnMsg['errCode'] = 2;
                 $returnMsg['errMsg'] = 'This user is already exist!';
             } else {
-                $userInfo['name'] = $this->getParam('post.name');
-                $userInfo['nick_name'] = $this->getParam('post.nickname');
-                $userInfo['email'] = $this->getParam('post.email');
-                $userInfo['tel'] = $this->getParam('post.tel');
-                $userInfo['personalized_signature'] = $this->getParam('post.personalized_signature');
+                $userInfo['name'] = getParam('post.name');
+                $userInfo['nick_name'] = getParam('post.nickname');
+                $userInfo['email'] = getParam('post.email');
+                $userInfo['tel'] = getParam('post.tel');
+                $userInfo['personalized_signature'] = getParam('post.personalized_signature');
                 $userInfo['level'] = 0;
                 $userInfo['last_login_time'] = time();
                 $userInfo['join_time'] = time();

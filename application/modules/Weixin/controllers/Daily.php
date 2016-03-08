@@ -1,19 +1,19 @@
 <?php
 
-class Wexin_DailyController extends Own_Controller_Base
+class DailyController extends Own_Controller_Base
 {
 
     /**
      *保持用户信息为最新，设定每天定时任务，更新用户信息。
      * 网页获取用户信息是没有接口频率限制的
      */
-    function remainLatestUserInfo()
+    function remainLatestUserInfoAction()
     {
         $startTime = time();
         $successNum = 0;
         $failNum = 0;
-        $fansinfoModel = M("FansInfo");
-        $userList = $fansinfoModel->field('openid,authorizerappid')->select();
+        $fansinfoModel = new Weixin_FansInfoModel();
+        $userList = $fansinfoModel->findMultiFans(null, 'openid,authorizerappid');
         foreach ($userList as $uer) {
             $saveState = saveOAuthUserInfo($uer['openid'], $uer['authorizerappid']);
             if ($saveState) {
@@ -32,16 +32,17 @@ class Wexin_DailyController extends Own_Controller_Base
      *设定此方法定时任务，每日凌晨执行，判别网页授权refresh_token是否快过期了
      * refresh_token有效期为30天,我们判断在25天左右刷新refresh_token
      */
-    function remainEffectiveOAuthRefreshToken()
+    function remainEffectiveOAuthRefreshTokenAction()
     {
         $startTime = time();
         $successNum = 0;
         $failNum = 0;
-        $OAuthFansTokenModel = M('OAuthFansToken');
         $refresh_time = time() + 5 * 24 * 60 * 60;
         $map['componentappid'] = C('APP_ID');
         $map['refresh_token_vldtimestamp'] = array('lt', $refresh_time);
-        $oAuthFansList = $OAuthFansTokenModel->limit(1)->field('authorizerappid,refresh_token,refresh_token_vldtimestamp')->where($map)->select();
+        $OAuthFansTokenModel = new Weixin_FansTokenModel();
+        $oAuthFansList = $OAuthFansTokenModel
+            ->findFans($map, 'authorizerappid,refresh_token,refresh_token_vldtimestamp');
         foreach ($oAuthFansList as $oAuthFans) {
             //用来刷新refresh_token
             $oauthAccessToken = getOAuthAccessToken_FromWXSever($oAuthFans['refresh_token'], $oAuthFans['authorizerappid']);
@@ -61,17 +62,18 @@ class Wexin_DailyController extends Own_Controller_Base
      *设定此方法定时任务，每日凌晨执行，判别授权公众号refresh_token是否快过期了
      * refresh_token有效期为30天,我们判断在25天左右刷新refresh_token
      */
-    function remainEffectiveAuthorizerRefreshToken()
+    function remainEffectiveAuthorizerRefreshTokenAction()
     {
         $startTime = time();
         $successNum = 0;
         $failNum = 0;
-        $AuthorizerRefreshTokenModel = M('AccountAuthorizerInfo');
         $refresh_time = time() + 5 * 24 * 60 * 60;
         $map['componentappid'] = C('APP_ID');
         $map['authorizer_refresh_token_vld_timestamp'] = array('lt', $refresh_time);
-        $authorizerList = $AuthorizerRefreshTokenModel->field('authorizerappid,authorizer_refresh_token,authorizer_refresh_token_vld_timestamp')
-            ->where($map)->select();
+        $accountAuthInfoModel = new Weixin_AccountAuthInfoModel();
+        $authorizerList = $accountAuthInfoModel
+            ->findMultiAccount($map,
+                'authorizerappid,authorizer_refresh_token,authorizer_refresh_token_vld_timestamp');
         foreach ($authorizerList as $authorizer) {
             //用来刷新refresh_token
             $appid = C('APP_ID');
@@ -80,17 +82,19 @@ class Wexin_DailyController extends Own_Controller_Base
             $postData = "{\"component_appid\":\"{$appid}\",\"authorizer_appid\":\"{$authorizerAppid}\",\"authorizer_refresh_token\":\"{$authorizer_refresh_token}\"}";
             $component_access_token = getComponent_Access_Token();
             $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=' . $component_access_token;
-            $reponseDataAtt = requestWXServer($postUrl, $postData);
-            if ($reponseDataAtt) {
+            $authInfo = requestWXServer($postUrl, $postData);
+            unset($authInfo['expires_in']);
+            if ($authInfo) {
                 $successNum++;
-                $reponseDataAtt['authorizer_access_token_vld_timestamp'] = time() + 7000;
-                $reponseDataAtt['authorizer_refresh_token_vld_timestamp'] = time() + 29 * 24 * 3600;
-                $accountauthorizerinfo = M("AccountAuthorizerInfo"); // 实例化AccountAuthorizerInfo对象
+                $authInfo['authorizer_access_token_vld_timestamp'] = time() + 7000;
+                $authInfo['authorizer_refresh_token_vld_timestamp'] = time() + 29 * 24 * 3600;
                 $whereAuthorizer['authorizerappid'] = $authorizerAppid;
                 $whereAuthorizer['componentappid'] = C('APP_ID');
-                $saveState = $accountauthorizerinfo->where($whereAuthorizer)->field('authorizer_access_token,authorizer_refresh_token,authorizer_access_token_vld_timestamp,authorizer_refresh_token_vld_timestamp')->save($reponseDataAtt); // 根据条件更新记录
+                $saveState = $accountAuthInfoModel
+                    ->updateAccount($whereAuthorizer, $authInfo);
                 if ($saveState === false) {
-                    $saveState = $accountauthorizerinfo->where($whereAuthorizer)->field('authorizer_access_token,authorizer_refresh_token,authorizer_access_token_vld_timestamp,authorizer_refresh_token_vld_timestamp')->save($reponseDataAtt); // 根据条件更新记录
+                    $saveState = $accountAuthInfoModel
+                        ->updateAccount($whereAuthorizer, $authInfo);
                     if ($saveState === false) {
                         errorLog(__FUNCTION__ . '获取失败', -3, true);
                         $failNum++;
@@ -105,20 +109,6 @@ class Wexin_DailyController extends Own_Controller_Base
             errorLog(__FUNCTION__ . '出错啦', -3, true);
         }
         echo 'success:' . $successNum . '<->fail:' . $failNum . '<->startTime:' . $startTime . '<->endTime:' . time();
-    }
-
-    function test()
-    {
-        $OAuthFansTokenModel = M('OAuthFansToken');
-        $refresh_time = time() + 5 * 24 * 60 * 60;
-        $map['componentappid'] = C('APP_ID');
-        $map['refresh_token_vldtimestamp'] = array('lt', $refresh_time);
-        echo $OAuthFansTokenModel->where($map)->Count();
-    }
-
-    function test1()
-    {
-        echo S('gggg') . ',' . time();
     }
 
 }

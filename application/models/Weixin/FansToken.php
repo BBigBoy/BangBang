@@ -1,32 +1,24 @@
 <?php
 
-class Weixin_FansTokenModel
+class Weixin_FansTokenModel extends \Illuminate\Database\Eloquent\Model
 {
-    private $tableName = 'think_o_auth_fans_token';
-    private $fansTokenDb;
+    public $timestamps = false;
+    protected $table = 'think_o_auth_fans_token';
 
-
-    /**
-     * Weixin_AccountAuthInfoModel constructor.
-     */
-    public function __construct()
-    {
-        $this->fansTokenDb = new Db_Mysql();
-    }
 
     function findFans($whereFans, $fields = '*')
     {
-        return $this->fansTokenDb->get_row($this->tableName, $whereFans, $fields);
+        return $this::where($whereFans)->select($fields)->first();
     }
 
     function updateFans($whereFans, $fansInfo)
     {
-        return $this->fansTokenDb->update($this->tableName, $fansInfo, $whereFans);
+        return $this::update($whereFans, $fansInfo);
     }
 
     function addFans($fansInfo)
     {
-        return $this->fansTokenDb->insert($this->tableName, $fansInfo);
+        return $this::insert($fansInfo);
     }
 
 }

@@ -1,23 +1,19 @@
 <?php
 
-class Weixin_AuthorizedAccountInfoModel
+class Weixin_AuthorizedAccountInfoModel extends \Illuminate\Database\Eloquent\Model
 {
 
-    private $tableName = 'think_authorized_account_info';
-    private $accountDb;
+    public $timestamps = false;
+    protected $table = 'think_authorized_account_info';
 
-    public function __construct()
-    {
-        $this->accountDb = new Db_Mysql();
-    }
 
     function findAccount($whereAuthorizer)
     {
-        return $this->accountDb->get_row($this->tableName, $whereAuthorizer);
+        return $this::where($whereAuthorizer)->first();
     }
 
     public function addUser($userInfo)
     {
-        return $this->accountDb->insert($this->tableName, $userInfo);
+        return $this::insert($userInfo);
     }
 }

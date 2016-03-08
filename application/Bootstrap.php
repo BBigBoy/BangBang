@@ -1,6 +1,4 @@
 <?php
-use Illuminate\Container\Container as LContainer;
-use Illuminate\Database\Capsule\Manager as Capsule;
 /**
  * @name Bootstrap
  * @author root
@@ -25,12 +23,12 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         Yaf_Loader::import(APPLICATION_PATH.'/application/library/Weixin/WXOpenplatform.php');
     }
 
-    public function _initPlugin(Yaf_Dispatcher $dispatcher)
-    {
-        //注册一个插件
-        $objSamplePlugin = new SamplePlugin();
-        $dispatcher->registerPlugin($objSamplePlugin);
-    }
+    /*public function _initPlugin(Yaf_Dispatcher $dispatcher)
+     {
+         //注册一个插件
+         $objSamplePlugin = new SamplePlugin();
+         $dispatcher->registerPlugin($objSamplePlugin);
+     }*/
 
     public function _initLocalName()
     {
@@ -47,7 +45,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     // 初始化 Eloquent ORM
     public function _initDefaultDbAdapter(Yaf_Dispatcher $dispatcher)
     {
-        $capsule = new Capsule();
+        $capsule = new \Illuminate\Database\Capsule\Manager();
         $capsule->addConnection(Yaf_Registry::get("config")->database->toArray());
         $capsule->setAsGlobal();
         $capsule->bootEloquent();

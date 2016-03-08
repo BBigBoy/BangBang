@@ -1,5 +1,6 @@
 {
   "require": {
-    "illuminate/database": "5.2.21"
+    "illuminate/database": "5.2.21",
+    "barryvdh/laravel-ide-helper": "dev-master"
   }
 }

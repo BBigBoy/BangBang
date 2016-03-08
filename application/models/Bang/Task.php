@@ -1,41 +1,33 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: root
- * Date: 16-3-4
- * Time: 上午11:14
- */
-class Bang_TaskModel
+class Bang_TaskModel extends \Illuminate\Database\Eloquent\Model
 {
-    private $tableName = 'think_bangbang_task';
+    public $timestamps = false;
+    protected $table = 'think_bangbang_task';
+    protected $primaryKey = '_id';
 
     /**
      * @return array
      */
     public function getTasks()
     {
-        $taskDb = new Db_Mysql();
-        $taskAtt = $taskDb
-            ->run("select think_fans_info.headimgurl,think_bangbang_task.instruction,think_bangbang_task.category
-               from think_bangbang_task
-               left join think_fans_info
-               ON think_bangbang_task.publish_user_openid = think_fans_info.openid
-               order by think_bangbang_task._id desc limit 20;")
-            ->fetchAll();
+        $select = 'think_fans_info.headimgurl,think_bangbang_task.instruction,think_bangbang_task.category';
+        $taskAtt = $this->selectRaw($select)
+            ->leftJoin('think_fans_info', 'think_bangbang_task.publish_user_openid', '=', 'think_fans_info.openid')
+            ->limit(20)
+            ->orderBy('think_bangbang_task._id', 'desc')
+            ->get();
         return $taskAtt;
     }
 
     function findTask($findInfo)
     {
-        $taskDb = new Db_Mysql();
-        return $taskDb->get_row($this->tableName, $findInfo);
+        return $this->where($findInfo)->first();
     }
 
     function addTask($taskInfo)
     {
-        $taskDb = new Db_Mysql();
-        return $taskDb->insert($this->tableName, $taskInfo);
+        return $this->insert($taskInfo);
     }
 
 }

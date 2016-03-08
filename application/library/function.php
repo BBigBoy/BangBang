@@ -342,6 +342,22 @@ function decodeUnicodeToUTF8($str)
         $str);
 }
 
+/**
+ * 统一获取参数，get、post等
+ * @param $paramName string
+ * @return mixed
+ */
+function getParam($paramName)
+{
+    $arr = explode('.', $paramName);
+    if ($arr[0] = 'post') {
+        return Yaf_Dispatcher::getInstance()->getRequest()->getPost($arr[1] ?: NULL);
+    } elseif ($arr[0] = 'get') {
+        return Yaf_Dispatcher::getInstance()->getRequest()->getQuery($arr[1] ?: NULL);
+    } else {
+        return Yaf_Dispatcher::getInstance()->getRequest()->get($paramName);
+    }
+}
 
 /**
  * 记录程序错误信息
@@ -363,7 +379,7 @@ function errorLog($addMsg = '', $errorCode = -3, $mail = false)
     $errorInfo['line'] = $debugBacktrace[0]['line'];
     $errorInfo['errcode'] = $errorCode ? $errorCode : -3;
     $errorInfo['errmsg'] = $addMsg;
-    $requestContent = 'clientIP:' . get_client_ip() . '--->post参数：' . decodeUnicodeToUTF8(json_encode(I('post.'))) . '<--->get参数:' . $_SERVER['REQUEST_URI'];
+    $requestContent = 'clientIP:' . get_client_ip() . '--->post参数：' . decodeUnicodeToUTF8(json_encode(getParam('post.'))) . '<--->get参数:' . $_SERVER['REQUEST_URI'];
     $errorInfo['requestContent'] = stripslashes($requestContent);
     $errorInfo['backtrace'] = stripslashes(decodeUnicodeToUTF8(json_encode(debug_backtrace())));
     $errorModel->addLog($errorInfo);

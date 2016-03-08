@@ -189,7 +189,7 @@ function getAuthorizerAccessTokenByRefreshToken($authorizerAppid)
         $authToken['authorizer_access_token_vld_timestamp'] = time() + 7000;
         $authToken['authorizer_refresh_token_vld_timestamp'] = time() + 29 * 24 * 3600;
         unset($authToken['expires_in']);
-        $accountInfoModel->updateAccount($authToken, $whereAuthAccount); // 根据条件更新记录
+        $accountInfoModel->updateAccount($whereAuthAccount, $authToken); // 根据条件更新记录
         S(WXOpenplatform_APP_ID . '/AUTHORIZER_ACCESS_TOKEN-' . $authorizerAppid, $authToken['authorizer_access_token'], 7000);
         return $authToken['authorizer_access_token'];
     } else {

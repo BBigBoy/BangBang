@@ -24,8 +24,7 @@ class Manager
     /**
      * Create a new database capsule manager.
      *
-     * @param  \Illuminate\Container\Container|null  $container
-     * @return void
+     * @param  \Illuminate\Container\Container|null $container
      */
     public function __construct(Container $container = null)
     {
