@@ -208,7 +208,7 @@ class Own_Validate
      * 校验方法会进行递归，为了遵循一次校验一次记录的规则，采用引用的方式实现
      * @param int $errorNum 错误序号，每次调用从1开始排序。  同样以引用的方式传递
      */
-    private function validateVar($var, $valiParam, $valiParamName, &$errMsg = '', &$errorNum = 0)
+    private static function validateVar($var, $valiParam, $valiParamName, &$errMsg = '', &$errorNum = 0)
     {
         $paramType = gettype($var);
         if (!(($paramType === $valiParam[self::TYPE])

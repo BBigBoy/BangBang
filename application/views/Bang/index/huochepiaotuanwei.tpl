@@ -27,9 +27,9 @@
         var title = '爱帮忙，一起来帮忙！';
         var userId = '{{$userInfo.id}}';
         userId = userId ? userId : '{{$loginUserInfo.id}}';
-        var link = host + '/Bang/Index/huochepiaotuanwei';
+        var link = host + '/index.php/Bang/Index/huochepiaotuanwei';
         var shareLink = userId ? ( link + '/id/' + userId) : link;
-        var imgUrl = host + '/Public/bang/Images/bang.jpg';
+        var imgUrl = host + '/public/bang/image/bangbang.jpg';
         wx.ready(function () {
             canOperate = true;
             wx.onMenuShareAppMessage({
@@ -71,9 +71,9 @@
     </style>
 </head>
 <body>
-<notempty name="Think.session.userId">
-    <span id="had-reg"></span>
-</notempty>
+{{if $userId }}
+<span id="had-reg"></span>
+{{/if}}
 <img src="/public/bang/image/top-tuanwei.jpg" style="width: 100%;border-bottom: #ee7800 1px dashed;">
 <!--<h1 style="text-align: center;color: #ee7800;">帮取火车票</h1>-->
 <div style="margin: 3% 6px;border: #ee7800 1px dashed;padding: 5px;">

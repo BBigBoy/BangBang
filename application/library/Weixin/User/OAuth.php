@@ -4,7 +4,7 @@
  * Class UserOAuth
  * @package Platform\Common\WXOAuth
  */
-abstract class Weixin_OAuth_UserOAuth
+abstract class Weixin_User_OAuth
 {
     /**
      *用户登录，创建会话，记录登录信息。
@@ -37,10 +37,10 @@ abstract class Weixin_OAuth_UserOAuth
             //如果存在cookie,则直接使用cookie。  因为cookie存在的时候，账户信息已经获取到了
             $openid = cookie($authAppId . 'openid');
             $loginRoad = 'cookie';
-        } elseif (I('get.ticket')) {
+        } elseif (getParam('get.ticket')) {
             //用户摇一摇时将通过本条件
             $shakeAround = Weixin_ShakeAround_ShakeAround::getInstance($authAppId);
-            $userShakeInfo = $shakeAround->getUserShakeInfo(I('get.ticket'));
+            $userShakeInfo = $shakeAround->getUserShakeInfo(getParam('get.ticket'));
             if ($userShakeInfo['data']['openid']) {
                 $openid = $userShakeInfo['data']['openid'];
                 $loginRoad = 'shake';
@@ -85,7 +85,7 @@ abstract class Weixin_OAuth_UserOAuth
             if (!$userInfo) {
                 //如果第三方应用没有该用户信息，则检测平台是否拥有该用户的信息
                 //如果平台也没有该用户信息，则发起网页授权认证
-                $userInfo = Weixin_OAuth_UserOAuth::loginUserInfo($openid);
+                $userInfo = Weixin_User_OAuth::loginUserInfo($openid);
                 if ($userInfo) {
                     $this->firstLogin($userInfo);
                 } else {
@@ -189,7 +189,7 @@ abstract class Weixin_OAuth_UserOAuth
             'get_timestamp');
         $whereFans['openid'] = $openid;
         $fansModel = new Weixin_FansInfoModel();
-        $fansInfo = $fansModel->findFans($whereFans, implode(',', $fields));
+        $fansInfo = $fansModel->findFans($whereFans, $fields);
         return $fansInfo;
     }
 

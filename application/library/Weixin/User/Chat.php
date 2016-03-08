@@ -1,5 +1,5 @@
 <?php
-class Weixin_Chat_WeChat
+class Weixin_User_Chat
 {
     const MSGTYPE_TEXT = 'text';
     const MSGTYPE_IMAGE = 'image';

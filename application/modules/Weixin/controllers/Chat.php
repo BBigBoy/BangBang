@@ -49,7 +49,7 @@ class ChatController extends Own_Controller_Base
      */
     private function dealWXVerify($wxPushArr)
     {
-        $myWeChatObj = new Weixin_Chat_WeChat(array());
+        $myWeChatObj = new Weixin_User_Chat(array());
         if ($wxPushArr['MsgType'] == 'event') {
             $myWeChatObj->text($wxPushArr['Event'] . 'from_callback')->reply();
         } elseif ($wxPushArr['MsgType'] == 'text') {
@@ -131,7 +131,7 @@ class ChatController extends Own_Controller_Base
      */
     private function saveSubscribeUserInfo($auth_app_id, $fromUserName)
     {
-        $userManager = new Weixin_Chat_UserManage();
+        $userManager = new Weixin_User_Manage();
         $userInfo = $userManager->getUserInfo($auth_app_id, $fromUserName);
         $userInfo['authorizerappid'] = $auth_app_id;
         $userInfo['componentappid'] = C('APP_ID');
@@ -158,7 +158,7 @@ class ChatController extends Own_Controller_Base
          $where['openid'] = $fromUserName;
          $userInfo = $focusFansInfo->where($where)->field($field)->find();
          */
-        $userManager = new Weixin_Chat_UserManage();
+        $userManager = new Weixin_User_Manage();
         $userManager->getUserInfo($auth_app_id, $fromUserName);
         /*if ($barrage['barrage_text']) {
             $barrage['openid'] = $fromUserName;

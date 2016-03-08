@@ -7,17 +7,16 @@
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <meta name="format-detection" content="telephone=no">
     <title>注册爱帮忙</title>
-    <!--<import type='js' file="Common.JS.zepto#min"/>-->
-    <import type='css' file="bang.CSS.register"/>
-    <import type='js' file="bang.JS.validate"/>
-    <import type='css' file="Common.CSS.frozen"/>
-    <import type='js' file="Common.JS.mdialog#1#0#min"/>
+    <link type="text/css" rel="stylesheet" href="/public/bang/css/register.css">
+    <script src="/public/bang/js/validate.js"></script>
+    <link type="text/css" rel="stylesheet" href="/public/common/css/frozen.css">
+    <script src="/public/common/js/mdialog.1.0.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 </head>
 <body>
 <div class="ui-form ui-border-t" style="margin-top: 3%;">
     <form id="info-form"
-          action="http://{{$Think.server.server_name}}{{$Think.server.script_name}}/bang/Index/registersubmit"
+          action="/Bang/Index/registersubmit"
           method="post">
         <div class="ui-form-item ui-border-b ui-form-item-show">
             <label>
@@ -29,7 +28,7 @@
             <label>
                 昵称
             </label>
-            <input type="text" name="nickname" value="{{$Think.session.nickname}}" placeholder="请输入昵称"/>
+            <input type="text" name="nickname" value="{{$smarty.session.nickname}}" placeholder="请输入昵称"/>
         </div>
         <div class="ui-form-item ui-border-b ui-form-item-show">
             <label>

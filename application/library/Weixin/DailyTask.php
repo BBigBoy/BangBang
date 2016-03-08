@@ -30,7 +30,7 @@ class Weixin_DailyTask
             $authorizerAppid = $authorizer['authorizerappid'];
             $authorizer_refresh_token = $authorizer['authorizer_refresh_token'];
             $postData = "{\"component_appid\":\"{$appid}\",\"authorizer_appid\":\"{$authorizerAppid}\",\"authorizer_refresh_token\":\"{$authorizer_refresh_token}\"}";
-            $component_access_token = getComponent_Access_Token();
+            $component_access_token = getComponentAccessToken();
             $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=' . $component_access_token;
             $authInfo = requestWXServer($postUrl, $postData);
             if ($authInfo) {

@@ -6,5 +6,6 @@ if (function_exists('saeAutoLoader')) {// 自动识别SAE环境
 }else{
     define('APP_MODE', 'local');
 }
+error_reporting(0);
 $application = new Yaf_Application(APPLICATION_PATH . "/conf/application.ini",APP_MODE);
 $application->bootstrap()->run();

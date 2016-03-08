@@ -126,7 +126,7 @@ class Weixin_Crypt_BizMsgCrypt
         $encrypt = $array[1];
         //$touser_name = $array[2];
         // 验证安全签名
-        $sha1 = new SHA1;
+        $sha1 = new Weixin_Crypt_SHA1();
         $array = $sha1->getSHA1($this->token, $timestamp, $nonce, $encrypt);
         $ret = $array[0];
 

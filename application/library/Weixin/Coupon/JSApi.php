@@ -32,7 +32,7 @@ class Weixin_Coupon_JSApi
 
     function getCouponJSApiTicket()
     {
-        $requestUrl = self::GetCouponApiTicketUrl . getComponent_Access_Token();
+        $requestUrl = self::GetCouponApiTicketUrl . getComponentAccessToken();
         $couponApiTicket = requestWXServer($requestUrl);
         return $couponApiTicket['ticket'];
     }

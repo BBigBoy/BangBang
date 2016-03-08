@@ -11,16 +11,14 @@ class Bang_UserModel extends \Illuminate\Database\Eloquent\Model
     public $timestamps = false;
     protected $table = 'think_bangbang_user';
 
-    function findUser($findInfo)
+    function findUser($findInfo, $fields = '*')
     {
-        $taskDb = new Db_Mysql();
-        return $taskDb->get_row($this->table, $findInfo);
+        return $this::where($findInfo)->select($fields)->first();
     }
 
     function addUser($userInfo)
     {
-        $taskDb = new Db_Mysql();
-        return $taskDb->insert($this->table, $userInfo);
+        return $this::insert($userInfo);
     }
 
 

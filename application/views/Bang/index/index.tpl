@@ -30,9 +30,9 @@
         var title = '爱帮忙，一起来帮忙！';
         var userId = '{{$userInfo.id}}';
         userId = userId ? userId : '{{$loginUserInfo.id}}';
-        var link = host + '/Bang';
+        var link = host + '/index.php/Bang/Index/index';
         var shareLink = userId ? ( link + '/id/' + userId) : link;
-        var imgUrl = host + '/Public/Common/Images/logoe.png';
+        var imgUrl = host + '/public/bang/image/bangbang.jpg';
         wx.ready(function () {
             canOperate = true;
             wx.onMenuShareAppMessage({
@@ -61,17 +61,17 @@
     </script>
 </head>
 <body class="HolyGrail" ontouchstart="">
-<notempty name="Think.session.userId">
-    <span id="had-reg"></span>
-</notempty>
+{{if $userId }}
+<span id="had-reg"></span>
+{{/if}}
 <header>
     <div id="carousel-example-generic" class="owl-carousel owl-theme" data-ride="carousel"
          style="width:100%;height: 100%;border-bottom: #000000 1px dashed;">
         <div class="item"><img src="/public/bang/image/top-shangxian.jpg" alt="shang xian"></div>
         <div class="item"><a href="/Bang/Index/huochepiaotuanwei">
-            <img src="/public/bang/image/top-huochepiao.jpg" alt="The Last of us"></a></div>
+                <img src="/public/bang/image/top-huochepiao.jpg" alt="The Last of us"></a></div>
         <div class="item"><a href="/Bang/Index/jiaoche">
-            <img src="/public/bang/image/top-zhuche.jpg" alt="zhu che"></a></div>
+                <img src="/public/bang/image/top-zhuche.jpg" alt="zhu che"></a></div>
         <div class="item"><img src="/public/bang/image/top-aibangmang.jpg" alt="GTA V"></div>
     </div>
 </header>
@@ -178,9 +178,9 @@
         isSubmiting = true;
     }
     pathName = window.location.pathname;
-    pathIndex=pathName.indexOf('index.php/');
-    scriptPath = 'http://' + window.location.host +((pathIndex!=-1)?'/index.php':'') ;
-     document.getElementById('get-task').onclick = function () {
+    pathIndex = pathName.indexOf('index.php/');
+    scriptPath = 'http://' + window.location.host + ((pathIndex != -1) ? '/index.php' : '');
+    document.getElementById('get-task').onclick = function () {
         /*if (!document.getElementById('had-reg')) {
          MDialog.open({
          showTitle: false,
@@ -207,16 +207,18 @@
             sendData(null, scriptPath + '/Bang/Index/huochepiaogetstraight', function (errCode) {
                 switch (errCode) {
                     case 0:
-                        window.location.href = 'http://' + window.location.host +
-                                pathName.substr(0, pathName.indexOf('.php/') + 4) + '/Bang/Index/msg';
+                        window.location.href = 'http://' + window.location.host
+                                + '/index.php/Bang/Index/msg';
                         break;
                     case 2:
-                        window.location.href = scriptPath + '/Bang/Index/msg';
+                        window.location.href = 'http://' + window.location.host
+                                + '/index.php/Bang/Index/msg';
                         break;
                     case -3:
                         window.location.reload();
                         break;
                     default:
+                        //alert(errCode);
                         console.log(errCode);
                 }
             });

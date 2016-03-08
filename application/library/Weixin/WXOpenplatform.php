@@ -24,7 +24,7 @@ function getComponentVerifyTicket()
 /**
  * 用于获取第三方平台令牌（component_access_token）
  */
-function getComponent_Access_Token()
+function getComponentAccessToken()
 {
     ///缓存中获取
     $mem = S(WXOpenplatform_APP_ID . '/COMPONENT_ACCESS_TOKEN');
@@ -34,7 +34,7 @@ function getComponent_Access_Token()
     ///网络请求
     $component_verify_ticket = getComponentVerifyTicket();
     if ($component_verify_ticket === false) {
-        errorLog('当前未保存到component_verify_ticket', -3, true);
+        errorLog(__FUNCTION__ . '获取失败', -3, true);
         return false;
     }
     $postData = "{\"component_appid\":\"%s\",\"component_appsecret\":\"%s\",
@@ -42,10 +42,9 @@ function getComponent_Access_Token()
     $postData = sprintf($postData, WXOpenplatform_APP_ID, WXOpenplatform_APP_SECRET, $component_verify_ticket);
     $reponseDataAtt = requestWXServer('https://api.weixin.qq.com/cgi-bin/component/api_component_token', $postData);
     if ($reponseDataAtt) {
-        $component_access_token = $reponseDataAtt['component_access_token'];
-        //(int)$jsonArr['expires_in']这个值为7200，为了避免在时间交叉点出现问题(如我的服务器与微信服务器时间存在不同不同步时)，将有限期设置为7000
-        S(WXOpenplatform_APP_ID . '/COMPONENT_ACCESS_TOKEN', $component_access_token, 7000);
-        return $component_access_token;
+        $componentAccessToken = $reponseDataAtt['component_access_token'];
+        S(WXOpenplatform_APP_ID . '/COMPONENT_ACCESS_TOKEN', $componentAccessToken, 7000);
+        return $componentAccessToken;
     } else {
         ///请求失败时再发起请求
         static $repeatNum = 0;
@@ -54,7 +53,7 @@ function getComponent_Access_Token()
             return false;
         }
         $repeatNum++;
-        getComponent_Access_Token();
+        getComponentAccessToken();
     }
 }
 
@@ -68,15 +67,14 @@ function getPreAuthCode()
     if ($mem != false) {
         return $mem;
     }
-    ///如果preauthcode.json文件不存在，或则preauthcode已经过期，则进行网络请求，获取新的preauthcode
     $app_id = WXOpenplatform_APP_ID;
     $postData = "{\"component_appid\":\"{$app_id}\"}";
-    $component_access_token = getComponent_Access_Token();
-    if ($component_access_token === false) {
-        errorLog('COMPONENT_ACCESS_TOKEN获取失败', -3, true);
+    $componentAccessToken = getComponentAccessToken();
+    if ($componentAccessToken === false) {
+        errorLog(__FUNCTION__ . '获取失败', -3, true);
         return false;
     }
-    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode?component_access_token=' . $component_access_token;
+    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode?component_access_token=' . $componentAccessToken;
     $reponseDataAtt = requestWXServer($postUrl, $postData);
     if ($reponseDataAtt) {
         $pre_auth_code = $reponseDataAtt['pre_auth_code'];
@@ -90,7 +88,7 @@ function getPreAuthCode()
             errorLog(__FUNCTION__ . '获取失败', -3, true);
             return false;
         }
-        $repeatNum++;
+        ++$repeatNum;
         getPreAuthCode();
     }
 }
@@ -107,38 +105,37 @@ function getAuthInfoByAuthCode($auth_code)
         errorLog('$auth_code错误');
         return false;
     }
-    $appid = WXOpenplatform_APP_ID;
-    $postData = "{\"component_appid\":\"{$appid}\",\"authorization_code\":\"{$auth_code}\"}";
-    $component_access_token = getComponent_Access_Token();
-    if ($component_access_token === false) {
-        errorLog('COMPONENT_ACCESS_TOKEN获取失败', -3, true);
+    $appId = WXOpenplatform_APP_ID;
+    $postData = "{\"component_appid\":\"{$appId}\",\"authorization_code\":\"{$auth_code}\"}";
+    $componentAccessToken = getComponentAccessToken();
+    if ($componentAccessToken === false) {
+        errorLog(__FUNCTION__.'获取失败', -3, true);
         return false;
     }
-    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_query_auth?component_access_token=' . $component_access_token;
+    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_query_auth?component_access_token=' . $componentAccessToken;
     $reponseDataAtt = requestWXServer($postUrl, $postData);
     if ($reponseDataAtt) {
-        $authorizerAppid = $reponseDataAtt['authorization_info']['authorizer_appid'];
-        $authorizer_access_token = $reponseDataAtt['authorization_info']['authorizer_access_token'];
-        $authorizer_refresh_token = $reponseDataAtt['authorization_info']['authorizer_refresh_token'];
-        //$timestamp = time() + ((int)$jsonObj->authorization_info->expires_in);
+        $authorizerAppId = $reponseDataAtt['authorization_info']['authorizer_appid'];
+        $authorizerAccessToken = $reponseDataAtt['authorization_info']['authorizer_access_token'];
+        $authorizerRefreshToken = $reponseDataAtt['authorization_info']['authorizer_refresh_token'];
         $timestamp = time() + 7000;
-        $func_info = $reponseDataAtt['authorization_info']['func_info'];
-        $func_list = '';
-        foreach ($func_info as $value) {
-            $func_list .= ($value['funcscope_category']['id'] . ';');
+        $funcInfo = $reponseDataAtt['authorization_info']['func_info'];
+        $funcList = '';
+        foreach ($funcInfo as $value) {
+            $funcList .= ($value['funcscope_category']['id'] . ';');
         }
         //保存到数据库
-        $authInfo['authorizerappid'] = $authorizerAppid;
+        $authInfo['authorizerappid'] = $authorizerAppId;
         $authInfo['componentappid'] = WXOpenplatform_APP_ID;
-        $authInfo['authorizer_access_token'] = $authorizer_access_token;
-        $authInfo['authorizer_refresh_token'] = $authorizer_refresh_token;
+        $authInfo['authorizer_access_token'] = $authorizerAccessToken;
+        $authInfo['authorizer_refresh_token'] = $authorizerRefreshToken;
         $authInfo['authorizer_access_token_vld_timestamp'] = $timestamp;
         $authInfo['authorizer_refresh_token_vld_timestamp'] = time() + 29 * 24 * 3600;
-        $authInfo['authorizer_funclist'] = $func_list;
+        $authInfo['authorizer_funclist'] = $funcList;
         $accountAuthInfoModel = new Weixin_AccountAuthInfoModel(); // 实例化AccountAuthorizerInfo对象
         $accountAuthInfoModel->addAccount($authInfo);
         //添加缓存
-        S(WXOpenplatform_APP_ID . '/AUTHORIZER_ACCESS_TOKEN-' . $authorizerAppid, $authorizer_access_token, 7000);
+        S(WXOpenplatform_APP_ID . '/AUTHORIZER_ACCESS_TOKEN-' . $authorizerAppId, $authorizerAccessToken, 7000);
         return $authInfo;
     } else {
         errorLog('AuthInfoByAuthCode获取失败', -3, true);
@@ -148,49 +145,49 @@ function getAuthInfoByAuthCode($auth_code)
 
 /**
  * 用于在授权方令牌（authorizer_access_token）失效时，使用刷新令牌获得口令
- * 先从静态缓存中读取，缓存不存在则从数据库中读取，当$authorizer_access_token在有效期内时直接使用，不在有效期则使用刷新口令重新获取
- * @param $authorizerAppid string
+ * 先从静态缓存中读取，缓存不存在则从数据库中读取，当$authorizerAccessToken在有效期内时直接使用，不在有效期则使用刷新口令重新获取
+ * @param $authorizerAppId string
  * @return mixed
  */
-function getAuthorizerAccessTokenByRefreshToken($authorizerAppid)
+function getAuthorizerAccessTokenByRefreshToken($authorizerAppId)
 {
     ///参数校验
-    if (!is_string($authorizerAppid) || ($authorizerAppid == '')) {
-        errorLog('$authorizerAppid错误');
+    if (!is_string($authorizerAppId) || ($authorizerAppId == '')) {
+        errorLog('$authorizerAppId错误');
         return false;
     }
     ///S缓存
-    $mem = S(WXOpenplatform_APP_ID . '/AUTHORIZER_ACCESS_TOKEN-' . $authorizerAppid);
+    $mem = S(WXOpenplatform_APP_ID . '/AUTHORIZER_ACCESS_TOKEN-' . $authorizerAppId);
     if ($mem != false) {
         return $mem;
     }
     ///数据库缓存提取
-    $whereAuthAccount['authorizerappid'] = $authorizerAppid;
+    $whereAuthAccount['authorizerappid'] = $authorizerAppId;
     $whereAuthAccount['componentappid'] = WXOpenplatform_APP_ID;
     $accountInfoModel = new Weixin_AccountAuthInfoModel();
     $data = $accountInfoModel->findAccount($whereAuthAccount);
-    $vld_timestamp = $data['authorizer_access_token_vld_timestamp'];
-    $authorizer_access_token = $data['authorizer_access_token'];
-    $authorizer_refresh_token = $data['authorizer_refresh_token'];
-    if ($vld_timestamp > time()) {//数据库存储的授权令牌未过期
-        return $authorizer_access_token;
+    $vldTimestamp = $data['authorizer_access_token_vld_timestamp'];
+    $authorizerAccessToken = $data['authorizer_access_token'];
+    $authorizerRefreshToken = $data['authorizer_refresh_token'];
+    if ($vldTimestamp > time()) {//数据库存储的授权令牌未过期
+        return $authorizerAccessToken;
     }
     ///网络获取
     $appid = WXOpenplatform_APP_ID;
-    $postData = "{\"component_appid\":\"{$appid}\",\"authorizer_appid\":\"{$authorizerAppid}\",\"authorizer_refresh_token\":\"{$authorizer_refresh_token}\"}";
-    $component_access_token = getComponent_Access_Token();
-    if ($component_access_token === false) {
+    $postData = "{\"component_appid\":\"{$appid}\",\"authorizer_appid\":\"{$authorizerAppId}\",\"authorizer_refresh_token\":\"{$authorizerRefreshToken}\"}";
+    $componentAccessToken = getComponentAccessToken();
+    if ($componentAccessToken === false) {
         errorLog('COMPONENT_ACCESS_TOKEN获取失败', -3, true);
         return false;
     }
-    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=' . $component_access_token;
+    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=' . $componentAccessToken;
     $authToken = requestWXServer($postUrl, $postData);
     if ($authToken) {
         $authToken['authorizer_access_token_vld_timestamp'] = time() + 7000;
         $authToken['authorizer_refresh_token_vld_timestamp'] = time() + 29 * 24 * 3600;
         unset($authToken['expires_in']);
         $accountInfoModel->updateAccount($whereAuthAccount, $authToken); // 根据条件更新记录
-        S(WXOpenplatform_APP_ID . '/AUTHORIZER_ACCESS_TOKEN-' . $authorizerAppid, $authToken['authorizer_access_token'], 7000);
+        S(WXOpenplatform_APP_ID . '/AUTHORIZER_ACCESS_TOKEN-' . $authorizerAppId, $authToken['authorizer_access_token'], 7000);
         return $authToken['authorizer_access_token'];
     } else {
         ///请求失败时再发起一次请求
@@ -200,7 +197,7 @@ function getAuthorizerAccessTokenByRefreshToken($authorizerAppid)
             return false;
         }
         $repeatNum++;
-        getAuthorizerAccessTokenByRefreshToken($authorizerAppid);
+        getAuthorizerAccessTokenByRefreshToken($authorizerAppId);
     }
 }
 
@@ -209,63 +206,63 @@ function getAuthorizerAccessTokenByRefreshToken($authorizerAppid)
  * 用于获取授权方的公众号基本信息，包括头像、昵称、帐号类型、认证类型、微信号、原始ID和二维码图片URL。
  * 需要特别记录授权方的帐号类型，在消息及事件推送时，对于不具备客服接口的公众号，需要在5秒内立即响应；而若有客服接口，
  * 则可以选择暂时不响应，而选择后续通过客服接口来发送消息触达粉丝。
- * @param $componentAppid string 开放平台创建的APPID
- * @param $authAppid  string 授权方appid
+ * @param $componentAppId string 开放平台创建的APPID
+ * @param $authAppId  string 授权方appid
  * @return mixed
  */
-function getAuthorizerAccountInfo($componentAppid, $authAppid)
+function getAuthorizerAccountInfo($componentAppId, $authAppId)
 {
     ///参数校验
-    if (!is_string($componentAppid) || ($componentAppid == '')) {
-        errorLog('$componentAppid错误');
+    if (!is_string($componentAppId) || ($componentAppId == '')) {
+        errorLog('$componentAppId错误');
         return false;
     }
-    if (!is_string($authAppid) || ($authAppid == '')) {
+    if (!is_string($authAppId) || ($authAppId == '')) {
         errorLog('authAppid错误');
         return false;
     }
     $accountInfoModel = new Weixin_AuthorizedAccountInfoModel();
-    $whereAuthorizer['authorizerappid'] = $authAppid;
-    $whereAuthorizer['componentappid'] = $componentAppid;
+    $whereAuthorizer['authorizerappid'] = $authAppId;
+    $whereAuthorizer['componentappid'] = $componentAppId;
     $accountInfoAtt = $accountInfoModel->findAccount($whereAuthorizer);
     if (!empty($accountInfoAtt)) {
-        $vld_timestamp = $accountInfoAtt['vld_timestamp'];
-        if ($vld_timestamp > time()) {
+        $vldTimestamp = $accountInfoAtt['vld_timestamp'];
+        if ($vldTimestamp > time()) {
             $accountInfoObj = new Weixin_Account_Info();
             $accountInfoObj->constructFromAtt($accountInfoAtt);
             return $accountInfoObj;
         }
     }
-    $postData = "{\"component_appid\":\"{$componentAppid}\",\"authorizer_appid\":\"{$authAppid}\"}";
-    $component_access_token = getComponent_Access_Token();
-    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?component_access_token=' . $component_access_token;
+    $postData = "{\"component_appid\":\"{$componentAppId}\",\"authorizer_appid\":\"{$authAppId}\"}";
+    $componentAccessToken = getComponentAccessToken();
+    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?component_access_token=' . $componentAccessToken;
     $newAccountInfoAtt = requestWXServer($postUrl, $postData);
     if ($newAccountInfoAtt) {
-        $vld_timestamp = time() + 60 * 60 * 6;//账户信息超过六个小时，即需要刷新
+        $vldTimestamp = time() + 60 * 60 * 6;//账户信息超过六个小时，即需要刷新
         $authorizerInfoAtt = $newAccountInfoAtt['authorizer_info'];
-        $nick_name = $authorizerInfoAtt['nick_name'];
-        $head_img_url = $authorizerInfoAtt['head_img'];
-        $service_type_info = $authorizerInfoAtt['service_type_info']['id'];
-        $verify_type_info = $authorizerInfoAtt['verify_type_info']['id'];
-        $user_name = $authorizerInfoAtt['user_name'];
+        $nickName = $authorizerInfoAtt['nick_name'];
+        $headImgUrl = $authorizerInfoAtt['head_img'];
+        $serviceTypeInfo = $authorizerInfoAtt['service_type_info']['id'];
+        $verifyTypeInfo = $authorizerInfoAtt['verify_type_info']['id'];
+        $userName = $authorizerInfoAtt['user_name'];
         $alias = $authorizerInfoAtt['alias'];
-        $qrcode_url = $authorizerInfoAtt['qrcode_url'];
-        $func_info = $authorizerInfoAtt['authorization_info']['func_info'];
-        $func_list = '';
-        foreach ($func_info as $i => $value) {
-            $func_list .= ($value['funcscope_category']['id'] . ';');
+        $qrcodeUrl = $authorizerInfoAtt['qrcode_url'];
+        $funcInfo = $authorizerInfoAtt['authorization_info']['func_info'];
+        $funcList = '';
+        foreach ($funcInfo as $i => $value) {
+            $funcList .= ($value['funcscope_category']['id'] . ';');
         }
-        $accountInfo['authorizerappid'] = $authAppid;
-        $accountInfo['componentappid'] = $componentAppid;
-        $accountInfo['vld_timestamp'] = $vld_timestamp;
-        $accountInfo['nick_name'] = $nick_name;
-        $accountInfo['head_img_url'] = $head_img_url;
-        $accountInfo['service_type_info'] = $service_type_info;
-        $accountInfo['verify_type_info'] = $verify_type_info;
-        $accountInfo['user_name'] = $user_name;
+        $accountInfo['authorizerappid'] = $authAppId;
+        $accountInfo['componentappid'] = $componentAppId;
+        $accountInfo['vld_timestamp'] = $vldTimestamp;
+        $accountInfo['nick_name'] = $nickName;
+        $accountInfo['head_img_url'] = $headImgUrl;
+        $accountInfo['service_type_info'] = $serviceTypeInfo;
+        $accountInfo['verify_type_info'] = $verifyTypeInfo;
+        $accountInfo['user_name'] = $userName;
         $accountInfo['alias'] = $alias;
-        $accountInfo['qrcode_url'] = $qrcode_url;
-        $accountInfo['funclist'] = $func_list;
+        $accountInfo['qrcode_url'] = $qrcodeUrl;
+        $accountInfo['funclist'] = $funcList;
         $accountInfoModel->addUser($accountInfo);
         $accountInfoObj = new Weixin_Account_Info();
         $accountInfoObj->constructFromAtt($accountInfo);
@@ -278,43 +275,43 @@ function getAuthorizerAccountInfo($componentAppid, $authAppid)
             return false;
         }
         $repeatNum++;
-        getAuthorizerAccountInfo($componentAppid, $authAppid);
+        getAuthorizerAccountInfo($componentAppId, $authAppId);
     }
 }
 
 /**
  * 用于获取授权方的公众号的选项设置信息，如：地理位置上报，语音识别开关，多客服开关。注意，获取各项选项设置信息，需要有授权方的授权，详见权限集说明。
- * @param $componentAppid string 开放平台创建的APPID
- * @param $authAppid  string 授权方appid
- * @param $option_name  string 选项名称
+ * @param $componentAppId string 开放平台创建的APPID
+ * @param $authAppId  string 授权方appid
+ * @param $optionName  string 选项名称
  * @return mixed
  */
-function getAuthorizerOptionInfo($componentAppid, $authAppid, $option_name)
+function getAuthorizerOptionInfo($componentAppId, $authAppId, $optionName)
 {
     ///参数校验
-    if (!is_string($componentAppid) || ($componentAppid == '')) {
-        errorLog('$componentAppid错误');
+    if (!is_string($componentAppId) || ($componentAppId == '')) {
+        errorLog('$componentAppId错误');
         return false;
     }
-    if (!is_string($authAppid) || ($authAppid == '')) {
+    if (!is_string($authAppId) || ($authAppId == '')) {
         errorLog('authAppid错误');
         return false;
     }
-    if (!is_string($option_name) || ($option_name == '')) {
-        errorLog('$option_name错误');
+    if (!is_string($optionName) || ($optionName == '')) {
+        errorLog('$optionName错误');
         return false;
     }
     $postData = "{
-                  \"component_appid\":\"{$componentAppid}\",
-                  \"authorizer_appid\":\"{$authAppid}\"
-                  \"option_name\":\"{$option_name}\"
+                  \"component_appid\":\"{$componentAppId}\",
+                  \"authorizer_appid\":\"{$authAppId}\"
+                  \"option_name\":\"{$optionName}\"
                   }";
-    $component_access_token = getComponent_Access_Token();
-    if ($component_access_token === false) {
+    $componentAccessToken = getComponentAccessToken();
+    if ($componentAccessToken === false) {
         errorLog('COMPONENT_ACCESS_TOKEN获取失败', -3, true);
         return false;
     }
-    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_option?component_access_token=' . $component_access_token;
+    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_option?component_access_token=' . $componentAccessToken;
     $reponseData = requestWXServer($postUrl, $postData);
     if ($reponseData) {
         return $reponseData;
@@ -326,48 +323,48 @@ function getAuthorizerOptionInfo($componentAppid, $authAppid, $option_name)
             return false;
         }
         $repeatNum++;
-        getAuthorizerOptionInfo($componentAppid, $authAppid, $option_name);
+        getAuthorizerOptionInfo($componentAppId, $authAppId, $optionName);
     }
 }
 
 /**
  * 用于设置授权方的公众号的选项信息，如：地理位置上报，语音识别开关，多客服开关。注意，设置各项选项设置信息，需要有授权方的授权，详见权限集说明。
- * @param $componentAppid string 开放平台创建的APPID
- * @param $authAppid  string 授权方appid
- * @param $option_name  string 选项名称
- * @param $option_value string 对应选项值
+ * @param $componentAppId string 开放平台创建的APPID
+ * @param $authAppId  string 授权方appid
+ * @param $optionName  string 选项名称
+ * @param $optionValue string 对应选项值
  * @return mixed
  */
-function setAuthorizerOptionInfo($componentAppid, $authAppid, $option_name, $option_value)
+function setAuthorizerOptionInfo($componentAppId, $authAppId, $optionName, $optionValue)
 {
     ///参数校验
-    if (!is_string($componentAppid) || ($componentAppid == '')) {
-        errorLog('$componentAppid错误');
+    if (!is_string($componentAppId) || ($componentAppId == '')) {
+        errorLog('$componentAppId错误');
         return false;
     }
-    if (!is_string($authAppid) || ($authAppid == '')) {
+    if (!is_string($authAppId) || ($authAppId == '')) {
         errorLog('authAppid错误');
         return false;
     }
-    if (!is_string($option_name) || ($option_name == '')) {
-        errorLog('$option_name错误');
+    if (!is_string($optionName) || ($optionName == '')) {
+        errorLog('$optionName错误');
         return false;
     }
-    if (!is_string($option_value) || ($option_value == '')) {
-        errorLog('$option_value错误');
+    if (!is_string($optionValue) || ($optionValue == '')) {
+        errorLog('$optionValue错误');
         return false;
     }
     ///
-    $postData = "{\"component_appid\":\"{$componentAppid}\",
-                  \"authorizer_appid\":\"{$authAppid}\"
-                  \"option_name\":\"{$option_name}\",
-                  \"option_value\":\"{$option_value}\"}";
-    $component_access_token = getComponent_Access_Token();
-    if ($component_access_token === false) {
+    $postData = "{\"component_appid\":\"{$componentAppId}\",
+                  \"authorizer_appid\":\"{$authAppId}\"
+                  \"option_name\":\"{$optionName}\",
+                  \"option_value\":\"{$optionValue}\"}";
+    $componentAccessToken = getComponentAccessToken();
+    if ($componentAccessToken === false) {
         errorLog('COMPONENT_ACCESS_TOKEN获取失败', -3, true);
         return false;
     }
-    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_set_authorizer_option?component_access_token=' . $component_access_token;
+    $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_set_authorizer_option?component_access_token=' . $componentAccessToken;
     $reponseData = requestWXServer($postUrl, $postData);
     if ($reponseData) {
         return $reponseData;
@@ -379,7 +376,7 @@ function setAuthorizerOptionInfo($componentAppid, $authAppid, $option_name, $opt
             return false;
         }
         $repeatNum++;
-        getAuthorizerOptionInfo($componentAppid, $authAppid, $option_name);
+        getAuthorizerOptionInfo($componentAppId, $authAppId, $optionName);
     }
 }
 
@@ -396,27 +393,27 @@ function setAuthorizerOptionInfo($componentAppid, $authAppid, $option_name, $opt
  * 如果是授权获得用户信息，则需要将得到的accesstoken、refreshtoken
  * 及其过期时间保存到数据库中
  * @param $code string 由微信服务器在回调时返回
- * @param $authAppid string  由微信服务器在回调时返回,授权公众号的appid
+ * @param $authAppId string  由微信服务器在回调时返回,授权公众号的appid
  * @return mixed 未获取到授权信息则返回false，否则返回对应授权信息
  */
-function getOAuthInfo($code, $authAppid)
+function getOAuthInfo($code, $authAppId)
 {
     ///参数校验
     if (!is_string($code) || ($code == '')) {
         errorLog('code错误');
         return false;
     }
-    if (!is_string($authAppid) || ($authAppid == '')) {
+    if (!is_string($authAppId) || ($authAppId == '')) {
         errorLog('authAppid错误');
         return false;
     }
-    $componentAccessToken = getComponent_Access_Token();
+    $componentAccessToken = getComponentAccessToken();
     if (!$componentAccessToken) {
-        errorLog('Component_Access_Token获取失败', -3, true);
+        errorLog('ComponentAccessToken获取失败', -3, true);
         return false;
     }
     $requestUrl = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=%s&code=%s&grant_type=authorization_code&component_appid=%s&component_access_token=%s";
-    $requestUrl = sprintf($requestUrl, $authAppid, $code, WXOpenplatform_APP_ID, $componentAccessToken);
+    $requestUrl = sprintf($requestUrl, $authAppId, $code, WXOpenplatform_APP_ID, $componentAccessToken);
     $oauthInfo = requestWXServer($requestUrl);
     unset($oauthInfo['expires_in']);
     if (!$oauthInfo) {
@@ -429,14 +426,14 @@ function getOAuthInfo($code, $authAppid)
         $oauthInfo['access_token_vldtimestamp'] = time() + 7000;
         $oauthInfo['refresh_token_vldtimestamp'] = time() + 29 * 24 * 3600;
         $whereFans['openid'] = $oauthInfo['openid'];
-        $whereFans['authorizerappid'] = $authAppid;
+        $whereFans['authorizerappid'] = $authAppId;
         $whereFans['componentappid'] = WXOpenplatform_APP_ID;
         $fansTokenModel = new Weixin_FansTokenModel();
         $userInfo = $fansTokenModel->findFans($whereFans);
         if ($userInfo) {
             $fansTokenModel->updateFans($whereFans, $oauthInfo);
         } else {
-            $oauthInfo['authorizerappid'] = $authAppid;
+            $oauthInfo['authorizerappid'] = $authAppId;
             $oauthInfo['componentappid'] = WXOpenplatform_APP_ID;
             $fansTokenModel->addFans($oauthInfo);
         }
@@ -448,24 +445,24 @@ function getOAuthInfo($code, $authAppid)
  *获取网页授权令牌，从数据库中查询，如果access_token仍在有效期，则直接返回，
  * 否则通过refresh_token刷新access_token令牌，并返回
  * 我们会每天凌晨执行定时任务，判断是否需要更新refresh_token
- * @param string $openid
- * @param $authAppid string 公众账号appid
+ * @param string $openId
+ * @param $authAppId string 公众账号appid
  * @return mixed access_token
  */
-function getOAuthAccessToken($openid, $authAppid)
+function getOAuthAccessToken($openId, $authAppId)
 {
     ///参数校验
-    if (!is_string($openid) || ($openid == '')) {
+    if (!is_string($openId) || ($openId == '')) {
         errorLog('openid错误');
         return false;
     }
-    if (!is_string($authAppid) || ($authAppid == '')) {
+    if (!is_string($authAppId) || ($authAppId == '')) {
         errorLog('authAppid错误');
         return false;
     }
     ///
-    $whereFans['openid'] = $openid;
-    $whereFans['authorizerappid'] = $authAppid;
+    $whereFans['openid'] = $openId;
+    $whereFans['authorizerappid'] = $authAppId;
     $whereFans['componentappid'] = WXOpenplatform_APP_ID;
     $whereFans['scope'] = 'snsapi_base,snsapi_userinfo,';
     $fansTokenModel = new Weixin_FansTokenModel();
@@ -476,52 +473,52 @@ function getOAuthAccessToken($openid, $authAppid)
             return $fansInfo['access_token'];
         } else {
             //access_token已过期，重新刷新
-            $access_token = getOAuthAccessToken_FromWXSever(
-                $fansInfo['refresh_token'], $authAppid);
-            if ($access_token) {
-                return $access_token;
+            $accessToken = getOAuthAccessTokenFromWXSever(
+                $fansInfo['refresh_token'], $authAppId);
+            if ($accessToken) {
+                return $accessToken;
             }
         }
     }
     ///请求失败时的处理
-    if (($fansInfo === false) || (isset($access_token) && ($access_token === false))) {
+    if (($fansInfo === false) || (isset($accessToken) && ($accessToken === false))) {
         static $repeatNum = 0;
         if ($repeatNum != 0) {//改变if条件就可以控制重复次数
             errorLog(__FUNCTION__ . '获取失败', -3, true);
             return false;
         }
         //避免第二次请求时，产生误判。
-        unset($access_token);
+        unset($accessToken);
         $repeatNum++;
-        getOAuthAccessToken($openid, $authAppid);
+        getOAuthAccessToken($openId, $authAppId);
     }
 }
 
 /**
  * 通过refresh_token重新获取access_token，同时refresh_token也会更新。
  * 所以本方法既可以用来刷新access_token，也可以更新refresh_token本身
- * @param $refresh_token string 网页授权刷新口令
- * @param $authAppid string 公众账号appid
+ * @param $refreshToken string 网页授权刷新口令
+ * @param $authAppId string 公众账号appid
  * @return mixed 成功返回access_token，失败返回false
  */
-function getOAuthAccessToken_FromWXSever($refresh_token, $authAppid)
+function getOAuthAccessTokenFromWXSever($refreshToken, $authAppId)
 {
     ///参数校验
-    if (!is_string($refresh_token) || ($refresh_token == '')) {
+    if (!is_string($refreshToken) || ($refreshToken == '')) {
         errorLog('refresh_token错误');
         return false;
     }
-    if (!is_string($authAppid) || ($authAppid == '')) {
+    if (!is_string($authAppId) || ($authAppId == '')) {
         errorLog('authAppid错误');
         return false;
     }
-    $componentAccessToken = getComponent_Access_Token();
+    $componentAccessToken = getComponentAccessToken();
     if (!$componentAccessToken) {
         errorLog('Component_Access_Token获取失败', -3, true);
         return false;
     }
     $requestUrl = "https://api.weixin.qq.com/sns/oauth2/component/refresh_token?appid=%s&grant_type=refresh_token&component_appid=%s&component_access_token=%s&refresh_token=%s";
-    $requestUrl = sprintf($requestUrl, $authAppid, WXOpenplatform_APP_ID, $componentAccessToken, $refresh_token);
+    $requestUrl = sprintf($requestUrl, $authAppId, WXOpenplatform_APP_ID, $componentAccessToken, $refreshToken);
     $fansToken = requestWXServer($requestUrl);
     unset($fansToken['expires_in']);
     if (!$fansToken) {
@@ -532,7 +529,7 @@ function getOAuthAccessToken_FromWXSever($refresh_token, $authAppid)
         $fansToken['access_token_vldtimestamp'] = time() + 7000;
         $fansToken['refresh_token_vldtimestamp'] = time() + 30 * 24 * 3600;
         $whereFans['openid'] = $fansToken['openid'];
-        $whereFans['authorizerappid'] = $authAppid;
+        $whereFans['authorizerappid'] = $authAppId;
         $whereFans['componentappid'] = WXOpenplatform_APP_ID;
         $fansTokenModel = new Weixin_FansTokenModel();
         $saveState = $fansTokenModel->updateFans($whereFans, $fansToken);
@@ -547,52 +544,52 @@ function getOAuthAccessToken_FromWXSever($refresh_token, $authAppid)
  * 如果网页授权作用域为snsapi_userinfo，
  * 则此时开发者可以通过access_token和openid拉取用户信息了。
  * 当已经获取到用户信息了再调取此方法，则可以更新用户信息
- * @param $openid string 微信用户的openid
- * @param $authAppid string 公众账号appid
+ * @param $openId string 微信用户的openid
+ * @param $authAppId string 公众账号appid
  * @param string $oauthAccessToken 网页授权令牌，
  *               建议当刚取得access_token时就自己传入，
  *               避免因为缓存原因取不到最新的令牌，造成难以发现的错误
  * @return mixed 授权用户信息
  */
-function saveOAuthUserInfo($openid, $authAppid, $oauthAccessToken = '')
+function saveOAuthUserInfo($openId, $authAppId, $oauthAccessToken = '')
 {
     ///参数校验
-    if (!is_string($openid) || ($openid == '')) {
+    if (!is_string($openId) || ($openId == '')) {
         errorLog('openid错误');
         return false;
     }
-    if (!is_string($authAppid) || ($authAppid == '')) {
+    if (!is_string($authAppId) || ($authAppId == '')) {
         errorLog('authAppid错误');
         return false;
     }
     if (!$oauthAccessToken) {
         //获取userinfo
-        $oauthAccessToken = getOAuthAccessToken($openid, $authAppid);
+        $oauthAccessToken = getOAuthAccessToken($openId, $authAppId);
         if (!$oauthAccessToken) {
             errorLog('当前不存在该用户的OAuthAccessToken', -3, true);
             return false;
         }
     }
     $requestUrl = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN";
-    $requestUrl = sprintf($requestUrl, $oauthAccessToken, $openid);
+    $requestUrl = sprintf($requestUrl, $oauthAccessToken, $openId);
     $fansInfo = requestWXServer($requestUrl);
     if ($fansInfo) {
         $fansInfo['privilege'] = json_encode($fansInfo['privilege']);
         $fansInfo['get_timestamp'] = time();
-        $whereFans['authorizerappid'] = $authAppid;
+        $whereFans['authorizerappid'] = $authAppId;
         $whereFans['componentappid'] = WXOpenplatform_APP_ID;
-        $whereFans['openid'] = $openid;
-        $fansinfoModel = new Weixin_FansInfoModel(); // 实例化AccountAuthorizerInfo对象
-        $updateState = $fansinfoModel->updateFans($whereFans, $fansInfo);
+        $whereFans['openid'] = $openId;
+        $fansInfoModel = new Weixin_FansInfoModel(); // 实例化AccountAuthorizerInfo对象
+        $updateState = $fansInfoModel->updateFans($whereFans, $fansInfo);
         if ($updateState === false) {
             errorLog('', -3, true);
             return false;
         } elseif ($updateState == 0) {
-            $fans = $fansinfoModel->findFans($whereFans);
+            $fans = $fansInfoModel->findFans($whereFans);
             if (!$fans) {
-                $fansInfo['authorizerappid'] = $authAppid;
+                $fansInfo['authorizerappid'] = $authAppId;
                 $fansInfo['componentappid'] = WXOpenplatform_APP_ID;
-                $addState = $fansinfoModel->addFans($fansInfo);
+                $addState = $fansInfoModel->addFans($fansInfo);
                 if ($addState === false) {
                     errorLog('', -3, true);
                 }

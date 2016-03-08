@@ -45,7 +45,7 @@ class DailyController extends Own_Controller_Base
             ->findFans($map, 'authorizerappid,refresh_token,refresh_token_vldtimestamp');
         foreach ($oAuthFansList as $oAuthFans) {
             //用来刷新refresh_token
-            $oauthAccessToken = getOAuthAccessToken_FromWXSever($oAuthFans['refresh_token'], $oAuthFans['authorizerappid']);
+            $oauthAccessToken = getOAuthAccessTokenFromWXSever($oAuthFans['refresh_token'], $oAuthFans['authorizerappid']);
             if ($oauthAccessToken === false) {
                 $failNum++;
             } else {
@@ -80,7 +80,7 @@ class DailyController extends Own_Controller_Base
             $authorizerAppid = $authorizer['authorizerappid'];
             $authorizer_refresh_token = $authorizer['authorizer_refresh_token'];
             $postData = "{\"component_appid\":\"{$appid}\",\"authorizer_appid\":\"{$authorizerAppid}\",\"authorizer_refresh_token\":\"{$authorizer_refresh_token}\"}";
-            $component_access_token = getComponent_Access_Token();
+            $component_access_token = getComponentAccessToken();
             $postUrl = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token?component_access_token=' . $component_access_token;
             $authInfo = requestWXServer($postUrl, $postData);
             unset($authInfo['expires_in']);

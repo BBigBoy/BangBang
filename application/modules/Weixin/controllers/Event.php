@@ -11,6 +11,7 @@ class EventController extends Own_Controller_Base
     {
     }
 
+
     /**
      *处理微信服务器对开放平台的推送事件
      * 1、取消授权事件

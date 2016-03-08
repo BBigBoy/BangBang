@@ -16,10 +16,10 @@
     <script>
         wx.config({
             debug: false,
-            appId: '{$signPackage["appId"]}',
-            timestamp: '{$signPackage["timestamp"]}',
-            nonceStr: '{$signPackage["nonceStr"]}',
-            signature: '{$signPackage["signature"]}',
+            appId: '{{$signPackage["appId"]}}',
+            timestamp: '{{$signPackage["timestamp"]}}',
+            nonceStr: '{{$signPackage["nonceStr"]}}',
+            signature: '{{$signPackage["signature"]}}',
             jsApiList: [
                 // 所有要调用的 API 都要加到这个列表中
                 'onMenuShareAppMessage', 'onMenuShareTimeline'
@@ -28,11 +28,11 @@
         var canOperate = false;
         var host = 'http://' + window.location.host;
         var title = '爱帮忙，一起来帮忙！';
-        var userId = '{$userInfo.id}';
-        userId = userId ? userId : '{$loginUserInfo.id}';
-        var link = host + '/Index.php/Bang';
+        var userId = '{{$userInfo.id}}';
+        userId = userId ? userId : '{{$loginUserInfo.id}}';
+        var link = host + '/index.php/Bang/Index/index';
         var shareLink = userId ? ( link + '/id/' + userId) : link;
-        var imgUrl = host + '/public/bang/image/bang.jpg';
+        var imgUrl = host + '/public/bang/image/bangbang.jpg';
         wx.ready(function () {
             canOperate = true;
             wx.onMenuShareAppMessage({
@@ -56,6 +56,7 @@
                     // 用户取消分享后执行的回调函数
                 }
             });
+
         });
     </script>
 </head>
@@ -310,8 +311,6 @@
             return true;
         }
     }
-    pathName = window.location.pathname;
-    scriptPath = 'http://' + window.location.host + ((pathName.indexOf('index.php/') != -1) ? '/index.php' : '');
     var isSubmiting = false;
     function sendData(data, url) {
         var XHR = new XMLHttpRequest();
@@ -332,7 +331,7 @@
                                 showTitle: false,
                                 content: "任务发布成功",
                                 onPositive: function () {
-                                    window.location.href = scriptPath + '/Bang/Index/index';
+                                    window.location.href = 'http://' + window.location.host + '/index.php/Bang/Index/index';
                                 }
                             });
                             break;
@@ -342,7 +341,7 @@
                                 content: "<div style='text-align: center;'>您已是我们的用户</div><div style='text-align: center;'>无需重复注册！</div>",
                                 contentType: "html",
                                 onPositive: function () {
-                                    window.location.href = scriptPath + '/Bang/Index/index';
+                                    window.location.href = 'http://' + window.location.host + '/index.php/Bang/Index/index';
                                 }
                             });
                             break;

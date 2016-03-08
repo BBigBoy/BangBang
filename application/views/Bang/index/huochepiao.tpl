@@ -26,10 +26,10 @@
         var host = 'http://' + window.location.host;
         var title = '爱帮忙，一起来帮忙！';
         var userId = '{{$userInfo.id}}';
-        userId = userId ? userId : '{{$loginUserInfo.id}}}';
-        var link = host + '/Bang';
+        userId = userId ? userId : '{{$loginUserInfo.id}}';
+        var link = host + '/index.php/Bang/Index/index';
         var shareLink = userId ? ( link + '/id/' + userId) : link;
-        var imgUrl = host + '/Public/bang/Images/bang.jpg';
+        var imgUrl = host + '/public/bang/image/bangbang.jpg';
         wx.ready(function () {
             canOperate = true;
             wx.onMenuShareAppMessage({
@@ -53,6 +53,7 @@
                     // 用户取消分享后执行的回调函数
                 }
             });
+
         });
     </script>
     <style>
@@ -124,9 +125,8 @@
                         return;
                     }
                     isSubmiting = false;
-                    //alert(jsonString);
+                    alert(jsonString);
                     var jsonObj = eval("(" + jsonString + ")");
-                    pathName = window.location.pathname;
                     switch (jsonObj.errCode) {
                         case 0:
                             MDialog.open({
@@ -135,8 +135,7 @@
                                 contentType: "html",
                                 onPositive: function () {
                                     window.location.href =
-                                            'http://' + window.location.host +
-                                            pathName.substr(0, pathName.indexOf('.php/') + 4) + '/bang/Index/index';
+                                            'http://' + window.location.host +'/index.php/Bang/Index/index';
                                 }
                             });
                             break;
@@ -154,6 +153,9 @@
                             break;
                         case -3:
                             window.location.reload();
+                            break;
+                        default:
+                            alert(jsonObj.errCode);
                             break;
                     }
                 }

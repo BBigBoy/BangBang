@@ -1,5 +1,5 @@
 <?php
-class Weixin_Chat_UserManage
+class Weixin_User_Manage
 {
     const USER_INFO_GET = 'https://api.weixin.qq.com/cgi-bin/user/info?';
     const MUTI_USER_INFO_GET = 'https://api.weixin.qq.com/cgi-bin/user/info/batchget?';

@@ -39,7 +39,8 @@ class AuthorizeController extends Own_Controller_Base
                     'syncPoiList', array(), 20, 5, '同步门店数据', array('authorizedAppId' => $authAppId));*/
             }
             header("Content-Type: text/html; charset=utf-8");
-            echo '您的摇一摇授权已成功！谢谢您！';
+            echo '您的微信授权已成功！谢谢您！';
+            return false;
         } else {
             $this->redirect('/Weixin/Authorize/authorize');
         }

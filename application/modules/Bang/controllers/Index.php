@@ -11,8 +11,47 @@ class IndexController extends Own_Controller_Base
     //TODO:对于火车票、注册等，统一使用一个接口，不要每项业务都去操作数据库。否则不好控制
     private static $TASK_CATEGORY = array('线上完成', '物流托运', '帮取火车票');
 
+
+    /**
+     *用户登录初始化。对于游客，生成session('openid')；
+     * 会员用户，则将会员信息记录到session
+     */
+    public function init()
+    {
+        parent::init();
+        if (getParam('get.ii')) {
+            return;
+        }
+        if (!session('nickname')) {
+            $user = new Weixin_User_OAuthBase();
+            $user->login();
+        } elseif (!session('userName')) {
+            $bangUserModel = new Bang_UserModel();
+            $loginUserInfo = $bangUserModel
+                ->findUser(array('openid' => session('openid')));
+            if ($loginUserInfo) {
+                session('userName', $loginUserInfo['name']);
+                session('userId', $loginUserInfo['_id']);
+                session('nickname', $loginUserInfo['nick_name']);
+                $this->assign('userId', $loginUserInfo['_id']);
+            }
+        }
+        $jssdk = new Weixin_JS_SDK(C('AUTH_APP_ID'));
+        $signPackage = $jssdk->getSignPackage();
+        $this->assign('signPackage', $signPackage);
+    }
+
     public function indexAction()
     {
+        //检测免费领取火车票业务是否使用
+        $bangTaskModel = new Bang_TaskModel();
+        $taskInfo['publish_user'] = session('userId');
+        $taskInfo['publish_user_openid'] = session('openid');
+        $taskInfo['activity_id'] = 1;
+        $hadUse = $bangTaskModel->findTask($taskInfo);
+        if ($hadUse) {
+            $this->assign('huochepiao_had_use', 'yes');
+        }
     }
 
     /**
@@ -62,8 +101,8 @@ class IndexController extends Own_Controller_Base
     public function huochepiaotuanweiAction()
     {
         //检测免费领取火车票业务是否使用
-        $taskInfo['publish_user'] = 1;//session('userId')
-        $taskInfo['publish_user_openid'] = 'osKdtuHwxjhA9uAJsGS7nbu27XQg';//session('openid')
+        $taskInfo['publish_user'] = session('userId');
+        $taskInfo['publish_user_openid'] = session('openid');
         $taskInfo['activity_id'] = 1;
         $task = (new Bang_TaskModel())->findTask($taskInfo);
         if ($task) {

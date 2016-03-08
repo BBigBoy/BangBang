@@ -11,7 +11,7 @@ Storage_Base::connect();
 function U($url)
 {
     $url = (strpos($url, '/') == 0) ? $url : ('/' . $url);
-    return $_SERVER['HTTP_HOST'] . '/index.php' . $url;
+    return 'http://'.$_SERVER['HTTP_HOST'] . '/index.php' . $url;
 }
 
 /**
@@ -32,6 +32,8 @@ function C($name, $section = 'platform', $fileName = 'modules.ini')
         $config = new Yaf_Config_Ini(APPLICATION_PATH . '/conf/' . $fileName);
         if (isset($config[$section])) {
             $config = $config[$section];
+        } else if ($fileName == 'modules.ini') {
+            $config = $config['platform'];
         } else {
             return false;
         }
@@ -350,12 +352,14 @@ function decodeUnicodeToUTF8($str)
 function getParam($paramName)
 {
     $arr = explode('.', $paramName);
-    if ($arr[0] = 'post') {
-        return Yaf_Dispatcher::getInstance()->getRequest()->getPost($arr[1] ?: NULL);
-    } elseif ($arr[0] = 'get') {
-        return Yaf_Dispatcher::getInstance()->getRequest()->getQuery($arr[1] ?: NULL);
+    $getName = $arr[1] ?: NULL;
+    $request = Yaf_Dispatcher::getInstance()->getRequest();
+    if ($arr[0] == 'post') {
+        return $request->getPost($getName);
+    } elseif ($arr[0] == 'get') {
+        return $request->getQuery($getName) ?: $request->getParam($getName);
     } else {
-        return Yaf_Dispatcher::getInstance()->getRequest()->get($paramName);
+        return $request->get($paramName);
     }
 }
 

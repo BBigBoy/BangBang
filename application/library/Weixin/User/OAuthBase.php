@@ -1,5 +1,5 @@
 <?php
-class Weixin_OAuth_BaseUserOAuth extends Weixin_OAuth_UserOAuth
+class Weixin_User_OAuthBase extends Weixin_User_OAuth
 {
     /**
      * 登陆初始化，一般可以判断会话是否存在，如果已存在，则可以不再执行后续操作

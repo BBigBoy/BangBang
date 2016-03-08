@@ -28,9 +28,9 @@
         var title = '爱帮忙，一起来帮忙！';
         var userId = '{{$userInfo.id}}';
         userId = userId ? userId : '{{$loginUserInfo.id}}';
-        var link = host + '/Bang';
+        var link = host + '/index.php/Bang/Index/index';
         var shareLink = userId ? ( link + '/id/' + userId) : link;
-        var imgUrl = host + '/Public/Common/Images/logoe.png';
+        var imgUrl = host + '/public/bang/image/bangbang.jpg';
         wx.ready(function () {
             canOperate = true;
             wx.onMenuShareAppMessage({
