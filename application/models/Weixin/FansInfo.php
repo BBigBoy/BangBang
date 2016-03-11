@@ -8,12 +8,12 @@ class Weixin_FansInfoModel extends \Illuminate\Database\Eloquent\Model
 
     function findFans($whereFans, $fields = '*')
     {
-        return $this::where($whereFans)->select($fields)->first();
+        return $this::where($whereFans)->select(explode(',',$fields))->first();
     }
 
     function findMultiFans($whereFans, $fields = '*')
     {
-        return $this::where($whereFans)->select($fields)->get();
+        return $this::where($whereFans)->select(explode(',',$fields))->get();
     }
 
     function updateFans($whereFans, $fansInfo)

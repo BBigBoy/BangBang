@@ -70,6 +70,6 @@ class Weixin_PoiModel extends \Illuminate\Database\Eloquent\Model
 
     public function findMultiPoi($wherePoi, $fields = '*')
     {
-        return $this->where($wherePoi)->select($fields)->get();
+        return $this->where($wherePoi)->select(explode(',',$fields))->get();
     }
 }

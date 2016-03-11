@@ -40,6 +40,6 @@ class Weixin_Shake_DeviceModel extends \Illuminate\Database\Eloquent\Model
  
     function findDevice($whereDevice, $fields = '*')
     {
-        return $this::where($whereDevice)->select($fields)->first();
+        return $this::where($whereDevice)->select(explode(',',$fields))->first();
     }
 }

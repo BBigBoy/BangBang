@@ -1,2 +1,4 @@
 .idea
 runtime/*
+sinaapp/*
+composer.lock

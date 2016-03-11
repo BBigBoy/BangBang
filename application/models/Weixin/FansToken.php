@@ -8,7 +8,7 @@ class Weixin_FansTokenModel extends \Illuminate\Database\Eloquent\Model
 
     function findFans($whereFans, $fields = '*')
     {
-        return $this::where($whereFans)->select($fields)->first();
+        return $this::where($whereFans)->select(explode(',',$fields))->first();
     }
 
     function updateFans($whereFans, $fansInfo)

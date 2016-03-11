@@ -11,9 +11,9 @@ class Bang_UserModel extends \Illuminate\Database\Eloquent\Model
     public $timestamps = false;
     protected $table = 'think_bangbang_user';
 
-    function findUser($findInfo, $fields = '*')
+    function findUser($findInfo)
     {
-        return $this::where($findInfo)->select($fields)->first();
+        return $this::where($findInfo)->first();
     }
 
     function addUser($userInfo)

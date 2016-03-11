@@ -10,14 +10,14 @@ class Weixin_AccountAuthInfoModel extends \Illuminate\Database\Eloquent\Model
         return $this::where($whereAccount)->delete();
     }
 
-    function findAccount($whereAccount, $fields = '*')
+    function findAccount($whereAccount)
     {
-        return $this::where($whereAccount)->select($fields)->first();
+        return $this::where($whereAccount)->first();
     }
 
     function findMultiAccount($whereAccount, $fields = '*')
     {
-        return $this::where($whereAccount)->select($fields)->get();
+        return $this::where($whereAccount)->select(explode(',',$fields))->get();
     }
 
 

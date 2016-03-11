@@ -11,7 +11,7 @@ class Bang_TaskModel extends \Illuminate\Database\Eloquent\Model
      */
     public function getTasks()
     {
-        $select = 'think_fans_info.headimgurl,think_bangbang_task.instruction,think_bangbang_task.category';
+        $select = 'think_fans_info.nickname,think_fans_info.headimgurl,think_bangbang_task.instruction,think_bangbang_task.category';
         $taskAtt = $this->selectRaw($select)
             ->leftJoin('think_fans_info', 'think_bangbang_task.publish_user_openid', '=', 'think_fans_info.openid')
             ->limit(20)
