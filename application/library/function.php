@@ -6,24 +6,26 @@ Storage_Base::connect();
 /**
  * 生成本域名下访问的链接地址
  * @param $url string 组成的格式为'/moduleName/controllerName/actionName/'
+ * @param $getParam array
+ * @param bool $host
  * @return string
  */
-function U($url)
+function U($url, $getParam = array(), $host = true)
 {
     $url = (strpos($url, '/') == 0) ? $url : ('/' . $url);
-    return 'http://'.$_SERVER['HTTP_HOST'] . '/index.php' . $url;
+    return ($host ? 'http://' . $_SERVER['HTTP_HOST'] : '') . '/index.php' . $url . arrToGetParamStr($getParam);
 }
 
 /**
  * 获取配置参数
- * @param $name string 配置名称
+ * @param $name string 配置名称 如果为null,则默认返回该分节所有配置
  * 默认为conf目录下modules.ini文件下platform节中对应的配置
  * @param $section string ini文件中分节的名称
  * @param $fileName string ini文件名称
  * @return mixed|void
  * 如果$section或者$fileName非法，返回bool值false
  */
-function C($name, $section = 'platform', $fileName = 'modules.ini')
+function C($name = null, $section = 'platform', $fileName = 'modules.ini')
 {
     if ($section == 'platform' && $fileName == 'modules.ini') {
         $section = (Yaf_Dispatcher::getInstance()->getRequest()->getModuleName()) ?: $section;
@@ -40,6 +42,9 @@ function C($name, $section = 'platform', $fileName = 'modules.ini')
     } catch (Exception $e) {
         //記錄一下錯誤日誌
         return false;
+    }
+    if (is_null($name)) {
+        return $config;
     }
     $arr = explode('.', $name);
     if (is_array($arr)) {
@@ -185,7 +190,6 @@ function S($name, $value = '', $options = null)
         return $cache->set($name, $value, $expire);
     }
 }
-
 
 /**
  * 快速文件数据读取和保存 针对简单类型数据 字符串、数组
@@ -388,8 +392,8 @@ function errorLog($addMsg = '', $errorCode = -3, $mail = false)
     $errorInfo['backtrace'] = stripslashes(decodeUnicodeToUTF8(json_encode(debug_backtrace())));
     $errorModel->addLog($errorInfo);
     if ($mail) {
-        /*  $errMsg = json_encode($errorInfo);
-          sendMail('928056199@qq.com', '错误提示', stripslashes(decodeUnicodeToUTF8($errMsg)));*/
+        $errMsg = json_encode($errorInfo);
+        sendMail(stripslashes(decodeUnicodeToUTF8($errMsg)), '错误提示');
     }
 }
 
@@ -454,7 +458,6 @@ function compress_html($string)
 
 }
 
-
 /**
  * 获得字符串长度，英文字符长为1，中文字符长度为2
  * @param $string string 待计算长度的字符串
@@ -474,6 +477,7 @@ function stringLength($string)
  */
 function arrToGetParamStr($arr, $questionOrAndMark = true)
 {
+
     $getString = $questionOrAndMark ? '?' : '&';
     foreach ($arr as $key => &$value) {
         $value = ($key . '=' . $value);
@@ -525,4 +529,61 @@ function getMobileInfo()
         return 'pc';
     }*/
     return 'other';
+}
+
+/**
+ * 发送邮件通知
+ * @param $content string 邮件内容
+ * @param null $subject 邮件主题.如果为空,则替换为内容
+ */
+function sendMail($content, $subject = null)
+{
+    Yaf_Loader::import(APPLICATION_PATH . '/application/library/Swift/swift_required.php');
+    $mailConfig = C(null, 'mail', 'mail.ini');
+    $transport = \Swift_SmtpTransport::newInstance($mailConfig['HOST'],
+        $mailConfig['PORT'], $mailConfig['SECURITY'])
+        ->setUsername($mailConfig['USER'])
+        ->setPassword($mailConfig['PWD']);
+    $mailer = \Swift_Mailer::newInstance($transport);
+    $message = \Swift_Message::newInstance()
+        ->setSubject(is_string($subject) ? $subject : $content)
+        ->setFrom(array($mailConfig['FROM_MAIL'] => $mailConfig['FROM_MAIL_NAME']))
+        ->setTo($mailConfig['TO_MAIL'])
+        ->setContentType("text/html")
+        ->setBody($content);
+    $mailer->protocol = 'smtp';
+    $mailer->send($message);
+}
+
+/**
+ * 添加任务队列,当前仅支持新浪云SaeTaskQueue,被添加的任务将会顺序执行
+ * TODO:在非sae环境类任务队列的实现
+ * @param $taskInfo array 包含任务的详细信息
+ * $taskInfo[] = array('url'=>"/page3.php", "postdata"=>"act=test");
+ * $taskInfo[] = array('url'=>"/page4.php", "postdata"=>"act=test", "prior"=>true);
+ */
+function addTaskQueue($taskInfo)
+{
+    for ($i = 2; $i >= 0; $i--) {
+        $taskQueue = new SaeTaskQueue('order_exe_' . $i);
+        if ($taskQueue->leftLength() >= count($taskInfo)) {
+            break;
+        }
+    }
+    $taskQueue->addTask($taskInfo);
+    //将任务推入队列
+    $ret = $taskQueue->push();
+    //任务添加失败时输出错误码和错误信息
+    if ($ret === false) {
+        $taskQueue->errno();
+        $taskQueue->errmsg();
+    }
+    /*错误码参考： - errno: 0 成功
+    - errno: 1 认证失败
+    - errno: 3 参数错误
+    - errno: 10 队列不存在
+    - errno: 11 队列已满或剩余长度不足
+    - errno: 500 服务内部错误
+    - errno: 999 未知错误
+    - errno: 403 权限不足或超出配额*/
 }

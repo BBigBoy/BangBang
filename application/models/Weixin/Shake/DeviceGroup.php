@@ -30,4 +30,30 @@ class Weixin_Shake_DeviceGroupModel extends \Illuminate\Database\Eloquent\Model
                 });
         }
     }
+
+    public function delAll()
+    {
+        $this->truncate();
+    }
+
+    public function countNum()
+    {
+        return $this->count();
+    }
+
+    public function addAll($groups)
+    {
+        return $this->insert($groups);
+    }
+
+    function selectNullDeviceGroup()
+    {
+        return $this->whereNull('device_ids')->select('group_id')->get();
+    }
+
+    function updateGroup($whereGroup, $groupInfo)
+    {
+        return $this::update($whereGroup, $groupInfo);
+    }
+
 }

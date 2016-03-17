@@ -2,16 +2,6 @@
 
 class EventController extends Own_Controller_Base
 {
-    public function indexAction()
-    {
-        exit('index</br>');
-    }
-
-    public function _empty()
-    {
-    }
-
-
     /**
      *处理微信服务器对开放平台的推送事件
      * 1、取消授权事件
@@ -30,15 +20,19 @@ class EventController extends Own_Controller_Base
         if ($errCode == 0) {
             $msgObj = simplexml_load_string($msg, 'SimpleXMLElement', LIBXML_NOCDATA);
             $infoType = (string)$msgObj->InfoType;
-            if ($infoType == 'unauthorized') {
+            if ($infoType == 'component_verify_ticket') {
+                $component_verify_ticket = (string)$msgObj->ComponentVerifyTicket;
+                F(C('APP_ID') . '/wx/component_verify_ticket', $component_verify_ticket);
+            } else if ($infoType == 'unauthorized') {//取消授权通知
                 $authorizerappid = (string)$msgObj->AuthorizerAppid;
                 $whereAuthorizer['authorizerappid'] = $authorizerappid;
                 $whereAuthorizer['componentappid'] = C('APP_ID');
                 $accountauthorizerinfo = new Weixin_AccountAuthInfoModel();
                 $accountauthorizerinfo->delAccount($whereAuthorizer);
-            } else if ($infoType == 'component_verify_ticket') {
-                $component_verify_ticket = (string)$msgObj->ComponentVerifyTicket;
-                F(C('APP_ID') . '/wx/component_verify_ticket', $component_verify_ticket);
+            } else if ($infoType == 'authorized') {//授权成功通知
+
+            } else if ($infoType == 'authorized') {//授权更新通知
+
             } else {
                 errorLog('openplatform_event1->msg:' . $msg, -3, true);
             }

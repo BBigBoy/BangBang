@@ -17,15 +17,18 @@ class IndexController extends Own_Controller_Base
      */
     public function indexAction()
     {
-        echo '<pre>';
-        var_dump($_SERVER);
-        return false;
-        $this->redirect('/Index/index/info/');
+        sendMail("测试");
     }
 
     function infoAction()
     {
         phpinfo();
+        return false;
+    }
+
+    function logAction()
+    {
+        errorLog('get--->' . getParam("get.") . "\npost--->" . getParam("post."));
         return false;
     }
 }

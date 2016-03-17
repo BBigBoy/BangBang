@@ -37,9 +37,44 @@ class Weixin_Shake_DeviceModel extends \Illuminate\Database\Eloquent\Model
                 });
         }
     }
- 
+
     function findDevice($whereDevice, $fields = '*')
     {
-        return $this::where($whereDevice)->select(explode(',',$fields))->first();
+        return $this::where($whereDevice)->select(explode(',', $fields))->first();
+    }
+
+    function updateDevice($whereDevice, $deviceInfo)
+    {
+        return $this::update($whereDevice, $deviceInfo);
+    }
+
+    function updateDeviceInList($deviceList, $deviceInfo)
+    {
+        return $this::whereIn('device_id', $deviceList)->update($deviceInfo);
+    }
+
+    public function delAll()
+    {
+        $this->truncate();
+    }
+
+    public function countNum()
+    {
+        return $this->count();
+    }
+
+    public function addAll($shakeDeviceAtt)
+    {
+        return $this->insert($shakeDeviceAtt);
+    }
+
+    function selectNullPageDevices()
+    {
+        return $this->whereNull('page_ids')->select('device_id')->get();
+    }
+
+    function selectDeviceNotInList($deviceAtt, $fields = '*')
+    {
+        return $this->whereNotIn('device_id',$deviceAtt)->select(explode(',', $fields))->get();
     }
 }

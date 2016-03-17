@@ -1,0 +1,2 @@
+
+ {{$content}}, " I am ", {{$name}};

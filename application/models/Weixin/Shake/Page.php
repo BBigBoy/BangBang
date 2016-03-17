@@ -25,9 +25,9 @@ class Weixin_Shake_PageModel extends \Illuminate\Database\Eloquent\Model
                     $table->primary('page_id');
                     $table->text('page_url');
                     $table->text('icon_url');
-                    $table->char('title',12);
-                    $table->char('description',14);
-                    $table->char('comment',30);
+                    $table->char('title', 12);
+                    $table->char('description', 14);
+                    $table->char('comment', 30);
                     $table->longText('device_ids')->nullable()->default(null);
                     $table->timestamp('create_time')->nullable()->default(null);
                     $table->engine = "InnoDB";
@@ -35,4 +35,30 @@ class Weixin_Shake_PageModel extends \Illuminate\Database\Eloquent\Model
                 });
         }
     }
+
+    function updatePage($wherePage, $pageInfo)
+    {
+        return $this::update($wherePage, $pageInfo);
+    }
+
+    public function delAll()
+    {
+        $this->truncate();
+    }
+
+    public function countNum()
+    {
+        return $this->count();
+    }
+
+    public function addAll($shakePageAtt)
+    {
+        return $this->insert($shakePageAtt);
+    }
+
+    function selectPageNotInList($pageAtt, $fields = '*')
+    {
+        return $this->whereNotIn('page_id',$pageAtt)->select(explode(',', $fields))->get();
+    }
+
 }

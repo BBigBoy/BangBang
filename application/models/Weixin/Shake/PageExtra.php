@@ -30,9 +30,23 @@ class Weixin_Shake_PageExtraModel extends \Illuminate\Database\Eloquent\Model
         }
     }
 
-
     function incDisplayNum($which)
     {
-        return $this::whereIn('page_id',$which)->increment('display_num');
+        return $this::whereIn('page_id', $which)->increment('display_num');
+    }
+
+    function findMultiPage($where, $fields = '*')
+    {
+        return $this->where($where)->select(explode(',', $fields))->get();
+    }
+
+    public function addAll($notExistPageAtt)
+    {
+        return $this->insert($notExistPageAtt);
+    }
+
+    function selectNullDevicePage()
+    {
+        return $this->whereNull('device_ids')->select('page_id')->get();
     }
 }

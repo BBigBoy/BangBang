@@ -39,7 +39,19 @@ class Weixin_Shake_DeviceExtraModel extends \Illuminate\Database\Eloquent\Model
         return $this::where($which)->increment('live_num');
     }
 
-    function updateDeviceExtra($whereDevice,$updateInfo){
-        return $this::update($whereDevice,$updateInfo);
+    function updateDeviceExtra($whereDevice, $updateInfo)
+    {
+        return $this::update($whereDevice, $updateInfo);
     }
+
+    function findMultiDevice($where, $fields = '*')
+    {
+        return $this->where($where)->select(explode(',', $fields))->get();
+    }
+
+    public function addAll($notExistDeviceAtt)
+    {
+        return $this->insert($notExistDeviceAtt);
+    }
+
 }
