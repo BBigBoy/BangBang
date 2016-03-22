@@ -138,7 +138,7 @@ abstract class Weixin_User_OAuth
             $authAppId = C('AUTH_APP_ID');
         }
         if (!$redrictUrl)
-            $redrictUrl = urlencode('http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
+            $redrictUrl = urlencode('http://' . ((strpos($_SERVER['SERVER_NAME'], 'www') !== false) ? '' : 'www') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
         $scope = 'snsapi_base';
         $state = 'base';
         $baseHeaderUrl = "Location: https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect";
@@ -205,7 +205,7 @@ abstract class Weixin_User_OAuth
             $authAppId = C('AUTH_APP_ID');
         }
         if (!$redrictUrl)
-            $redrictUrl = urlencode('http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
+            $redrictUrl = urlencode('http://' . ((strpos($_SERVER['SERVER_NAME'], 'www') !== false) ? '' : 'www') . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
         $scope = 'snsapi_userinfo';
         $state = 'userinfo';
         $baseHeaderUrl = "Location: https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect";

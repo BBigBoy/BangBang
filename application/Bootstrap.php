@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @name Bootstrap
  * @author root
@@ -17,10 +18,20 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         Yaf_Registry::set('config', $arrConfig);
     }
 
+    // 初始化 Eloquent ORM
+    public function _initDefaultDbAdapter(Yaf_Dispatcher $dispatcher)
+    {
+        $capsule = new \Illuminate\Database\Capsule\Manager();
+        $capsule->addConnection(Yaf_Registry::get("config")->database->toArray());
+        $capsule->setAsGlobal();
+        $capsule->bootEloquent();
+    }
+
     public function _initFunc()
     {
-        Yaf_Loader::import(APPLICATION_PATH.'/application/library/function.php');
-        Yaf_Loader::import(APPLICATION_PATH.'/application/library/Weixin/WXOpenplatform.php');
+        Storage_Base::connect();//初始化F方法存儲數據方法
+        Yaf_Loader::import(APPLICATION_PATH . '/application/library/function.php');
+        Yaf_Loader::import(APPLICATION_PATH . '/application/library/Weixin/WXOpenplatform.php');
     }
 
     /*public function _initPlugin(Yaf_Dispatcher $dispatcher)
@@ -36,20 +47,6 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         Yaf_Loader::getInstance()->registerLocalNamespace(array('Smarty', 'Own'));
     }
 
-    public function _initSmarty(Yaf_Dispatcher $dispatcher)
-    {
-        $smarty = new Smarty_Adapter(null, Yaf_Registry::get("config")->get("smarty"));
-        $dispatcher->setView($smarty);
-        /* now the Smarty view engine become the default view engine of Yaf */
-    }
-    // 初始化 Eloquent ORM
-    public function _initDefaultDbAdapter(Yaf_Dispatcher $dispatcher)
-    {
-        $capsule = new \Illuminate\Database\Capsule\Manager();
-        $capsule->addConnection(Yaf_Registry::get("config")->database->toArray());
-        $capsule->setAsGlobal();
-        $capsule->bootEloquent();
-    }
     public function _initRoute(Yaf_Dispatcher $dispatcher)
     {
         //在这里注册自己的路由协议,默认使用简单路由
@@ -58,5 +55,8 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     public function _initView(Yaf_Dispatcher $dispatcher)
     {
         //在这里注册自己的view控制器，例如smarty,firekylin
+        $smarty = new Smarty_Adapter(null, Yaf_Registry::get("config")->get("smarty"));
+        $dispatcher->setView($smarty);
+        /* now the Smarty view engine become the default view engine of Yaf */
     }
 }

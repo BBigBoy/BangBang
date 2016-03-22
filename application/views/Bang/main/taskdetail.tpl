@@ -7,7 +7,7 @@
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <meta name="format-detection" content="telephone=no">
     <title>任务详情</title>
-    <link type="text/css" rel="stylesheet" href="/public/common/css/weui.min.css">
+    <link type="text/css" rel="stylesheet" href="/public/bang/css/taskdetail.css">
     <script src="/public/common/js/jquery.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
     <script>
@@ -58,6 +58,40 @@
     </script>
 </head>
 <body ontouchstart="">
+<div class="msg" msgId="{{$task._id}}">
+    <div class="msg-head">
+        <img class="msg-head-img" src="{{$task.headimgurl}}">
+        <div class="msg-head-text">
+            <div class="msg-head-name">{{$task.nickname}}</div>
+            <div class="msg-head-info">
+                <span>西农大北校区</span>
+            </div>
+        </div>
+    </div>
+    <div class="msg-content">
+        <span>{{$task.instruction}}</span>
+    </div>
+    <div class="msg-bottom">
+        <div>
+            <span>金额:</span>
+            <span>{{$task.reward}}元</span>
+        </div>
+        <div>
+            <span>任务发布时间:</span>
+            <span>{{formatTime($task.time_start)}}</span>
+        </div>
+        <div>
+            <span>任务最后领取时间:</span>
+            <span>{{formatTime($task.time_end)}}</span>
+        </div>
+    </div>
+</div>
+<button class="btn"
+        {{($task_status)?'disabled="disabled"':''}}>{{$task_status_text}}</button>
+<a class="btn" href="tel:{{$task.tel}}">联系TA</a>
+<div style="height: 500px;border: 2px dashed #e68;margin: 2px;">
+    评论区:待做
+</div>
 
 <script>
 </script>

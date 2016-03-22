@@ -275,7 +275,6 @@ class IndexController extends Own_Controller_Base
             $returnMsg['errMsg'] = 'Unauthorized Access!';
         } else {
             $taskInfo['publish_user'] = session('userId') ?: 0;
-            $taskInfo['publish_user_openid'] = session('openid');
             $taskInfo['category'] = getParam('post.category_index');
             $taskInfo['instruction'] = getParam('post.instruction');
             $taskInfo['reward'] = ((float)getParam('post.reward')) * 100;
@@ -284,7 +283,7 @@ class IndexController extends Own_Controller_Base
             }
             $taskInfo['status'] = 0;
             $taskInfo['time_start'] = time();
-            $taskInfo['time_end'] = mktime(23, 59, 59, getParam('post.month_end'), getParam('post.day_end'), getParam('post.year_end'));
+            $taskInfo['time_end'] = mktime(23, 59, 58, getParam('post.month_end'), getParam('post.day_end'), getParam('post.year_end'));
             if (getParam('post.category') == '物流托运' || getParam('post.category') == '帮取火车票') {
                 $taskInfo['loc_goal_province'] = getParam('post.prov_goal');
                 $taskInfo['loc_goal_city'] = getParam('post.city_goal');
@@ -341,7 +340,8 @@ class IndexController extends Own_Controller_Base
                 $returnMsg['errMsg'] = 'This user is already exist!';
             } else {
                 $userInfo['name'] = getParam('post.name');
-                $userInfo['nick_name'] = getParam('post.nickname');
+                $userInfo['headimgurl'] = session('headImgUrl');
+                $userInfo['nickname'] = getParam('post.nickname');
                 $userInfo['email'] = getParam('post.email');
                 $userInfo['tel'] = getParam('post.tel');
                 $userInfo['personalized_signature'] = getParam('post.personalized_signature');

@@ -11,18 +11,22 @@ class Bang_TaskModel extends \Illuminate\Database\Eloquent\Model
      */
     public function getTasks()
     {
-        $select = 'think_fans_info.nickname,think_fans_info.headimgurl,think_bangbang_task.instruction,think_bangbang_task.category';
-        $taskAtt = $this->selectRaw($select)
-            ->leftJoin('think_fans_info', 'think_bangbang_task.publish_user_openid', '=', 'think_fans_info.openid')
+        $select = 'nickname,headimgurl,instruction,category,status,reward,time_start,think_bangbang_task._id';
+        return $this
+            ->selectRaw($select)
+            ->leftJoin('think_bangbang_user', 'think_bangbang_task.publish_user', '=', 'think_bangbang_user._id')
             ->limit(20)
             ->orderBy('think_bangbang_task._id', 'desc')
             ->get();
-        return $taskAtt;
     }
 
-    function findTask($findInfo)
+    function findTask($taskId)
     {
-        return $this->where($findInfo)->first();
+        //$select = 'nickname,headimgurl,instruction,category,status,reward,time_start,think_bangbang_task._id';
+        return $this
+            ->where(array('think_bangbang_task._id' => $taskId))
+            ->leftJoin('think_bangbang_user', 'think_bangbang_task.publish_user', '=', 'think_bangbang_user._id')
+            ->first();
     }
 
     function addTask($taskInfo)

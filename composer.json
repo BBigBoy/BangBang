@@ -1,6 +1,8 @@
 {
   "require": {
     "illuminate/database": "5.2.21",
-    "barryvdh/laravel-ide-helper": "dev-master"
+    "barryvdh/laravel-ide-helper": "dev-master",
+    "monolog/monolog": "^1.18",
+    "wazaari/monolog-mysql": ">1.0.0"
   }
 }
