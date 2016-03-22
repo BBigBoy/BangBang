@@ -176,6 +176,7 @@ html, body {
 
 .tab-content3-img {
     width: 100%;
+    max-height: 36%;
     -webkit-box-flex: 0;
     -webkit-flex: 0;
     flex: 0;
@@ -223,7 +224,7 @@ html, body {
 
 .func-item {
     background: white no-repeat center 30%;
-    background-size: 37% auto;
+    background-size: auto 50%;
     -webkit-box-flex: 1;
     -webkit-flex: 1;
     flex: 1;
@@ -235,7 +236,7 @@ html, body {
     -webkit-box-pack: center; /*Safari,Opera,Chrome*/
     -webkit-box-orient: vertical; /*Safari,Opera,Chrome*/
     color: #FF7F0D;
-    margin: 0.5px;
+    margin: 1.5px;
     font-size: 0.8em;
 }
 
