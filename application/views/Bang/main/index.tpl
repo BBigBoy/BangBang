@@ -18,7 +18,7 @@
     <div class="tab-content" title="首页">
         <div class="tab-content1">
             {{foreach $tasks as $task}}
-            <div class="msg" msgId="{{$task._id}}">
+            <div class="msg" taskId="{{$task._id}}">
                 <div class="msg-head">
                     <img class="msg-head-img lazy" src="/public/bang/image/bangbang.jpg"
                          data-original="{{$task.headimgurl}}">
@@ -180,7 +180,7 @@
             var host = 'http://' + window.location.host;
             var link = host + '/index.php/Bang/Main/taskDetail';
             $(".msg").on('click', function () {
-                window.location.href = link+'?ii=99&taskId='+$(this).attr('msgId');
+                window.location.href = link+'?ii=99&taskId='+$(this).attr('taskId');
             });
             $("img.lazy").lazyload({
                 event: "loadimg"

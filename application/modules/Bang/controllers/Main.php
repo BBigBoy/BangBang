@@ -12,6 +12,10 @@ class MainController extends Own_Controller_Base
     {
         parent::init();
         if (getParam('get.ii')) {
+            //测试的时候模拟一个登陆用户
+            session('userId', 6);
+            cookie('nickname', 'BigBigBoy');
+            cookie('headimgurl', 'http://wx.qlogo.cn/mmopen/seHTfIrWGf40t7p4lsSvY4WvMYmoZWSiaOZutbia756ORWwyuCmWMZyMYQicyxAhdRPAZWJGiciaibHr9lh5wY4mwxRax4yribGpzzQ/0');
             return;
         }
         if (!session('nickname')) {
@@ -26,6 +30,8 @@ class MainController extends Own_Controller_Base
                 session('userName', $loginUserInfo['name']);
                 session('userId', $loginUserInfo['_id']);
                 session('nickname', $loginUserInfo['nick_name']);
+                cookie('nickname', $loginUserInfo['nick_name']);
+                cookie('headimgurl', $loginUserInfo['headimgurl']);
                 $this->assign('userId', $loginUserInfo['_id']);
             }
         }
@@ -59,6 +65,45 @@ class MainController extends Own_Controller_Base
             $this->assign('task_status_text', '任务已过期');
         }
         $this->assign('task_status', $taskStatus);
+        $comments = (new Bang_CommentModel())->getComments($taskId);
+        $this->assign('comments', json_encode($comments));
     }
 
+    /**
+     *处理评论提交按钮
+     * 返回值对应关系：
+     * errCode  errMsg
+     * 0        ok
+     * -1       System wrong!                系统错误，与客户端无关
+     * -2       Unauthorized Access!         非法入侵访问
+     * -3       Data is not legitimate!      提交的数据验证不通过
+     * 2        This user is already exist!  注册的用户已经存在
+     */
+    public function postCommentAction()
+    {
+        $returnMsg['errCode'] = 0;
+        $returnMsg['errMsg'] = 'ok';
+        $valiRuleArr['comment'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR, Own_Validate::MIN_LEN => 1);
+        $valiRuleArr['aim_comment'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+        $valiRuleArr['task'] = array(Own_Validate::TYPE => Own_Validate::STRING_VAR);
+        $valiResult = Own_Validate::validateFuncParam(getParam('post.'), $valiRuleArr);
+        if (!$valiResult) {
+            $returnMsg['errCode'] = -3;
+            $returnMsg['errMsg'] = 'Data is not legitimate!';
+        } else if (!session('userId')) {
+            $returnMsg['errCode'] = -2;
+            $returnMsg['errMsg'] = 'Unauthorized Access!';
+        } else {
+            $commentModel = new Bang_CommentModel();
+            $commentInfo['user'] = session('userId');
+            $commentInfo['task'] = getParam('post.task');
+            $commentInfo['aim_comment'] = getParam('post.aim_comment');
+            $commentInfo['content'] = getParam('post.comment');
+            $commentInfo['post_time'] = time();
+            $insertId = $commentModel->insertComment($commentInfo);
+            $commentInfo['_id'] = $insertId;
+            $returnMsg['data'] = json_encode($commentInfo);
+        }
+        exit(json_encode($returnMsg));
+    }
 }

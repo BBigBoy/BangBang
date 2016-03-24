@@ -352,12 +352,11 @@ function decodeUnicodeToUTF8($str)
 function getParam($paramName)
 {
     $arr = explode('.', $paramName);
-    $getName = $arr[1] ?: NULL;
     $request = Yaf_Dispatcher::getInstance()->getRequest();
     if ($arr[0] == 'post') {
-        return $request->getPost($getName);
+        return $arr[1] ? $request->getPost($arr[1]) : $request->getPost();
     } elseif ($arr[0] == 'get') {
-        return $request->getQuery($getName) ?: $request->getParam($getName);
+        return ($arr[1] ? $request->getQuery($arr[1]) : $request->getQuery()) ?: $request->getParam($getName);
     } else {
         return $request->get($paramName);
     }

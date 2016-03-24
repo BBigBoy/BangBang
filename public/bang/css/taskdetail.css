@@ -1,7 +1,6 @@
 html, body {
     width: 100%;
     height: 100%;
-    overflow-x: hidden;
 }
 
 * {
@@ -44,6 +43,7 @@ html, body {
     -webkit-box-flex: 1;
     -webkit-flex: 1;
     flex: 1;
+    color: rgba(94, 100, 115, 0.88);
     -webkit-box-orient: vertical; /*Safari,Opera,Chrome*/
     -webkit-box-align: start; /*Safari,Opera,Chrome*/
     -webkit-box-pack: center; /*Safari,Opera,Chrome*/
@@ -69,7 +69,7 @@ html, body {
     margin: 2px 5%;
 }
 
-.btn {
+.btn-lg {
     display: block;
     width: 70%;
     margin: 10px auto;
@@ -81,6 +81,78 @@ html, body {
     line-height: 36px;
 }
 
-.btn:disabled {
+.btn-lg:disabled {
     background: #c7c7c7;
+}
+
+.btn-primary {
+    display: block;
+    width: 50px;
+    text-align: center;
+    background: #00aeef;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    line-height: 26px;
+}
+
+.divider {
+    border: 1px solid #ccc;
+    margin: 2px;
+}
+
+.comment-textarea {
+    width: 95%;
+    margin: 6px auto;
+    height: 120px;
+    display: block;
+    font-size: 1.3em;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+
+.comment-btn-position {
+    float: right;
+    margin-right: 2.5%;
+}
+
+.posted-comment {
+    position: relative;
+    border-bottom: 1px solid #ddd;
+    margin: 0 3px;
+}
+
+.comment-content {
+    font-size: 1.3em;
+    margin-left: 20%;
+    color: rgba(31, 30, 33, 0.84);
+}
+
+.post-time {
+    text-align: right;
+    font-size: 0.8em;
+    margin-right: 6px;
+    color: #aaa;
+}
+
+.reply-btn {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    color: #777;
+    font-size: 1.3em;
+    z-index: 10;
+}
+
+.reply-btn:active {
+    color: #111;
+    background: white;
+}
+
+.none-comment {
+    display: none;
+    text-align: center;
+    margin: 50px 0;
+    font-size: 1em;
+    color: #bbb;
 }

@@ -22,8 +22,9 @@ class Bang_TaskModel extends \Illuminate\Database\Eloquent\Model
 
     function findTask($taskId)
     {
-        //$select = 'nickname,headimgurl,instruction,category,status,reward,time_start,think_bangbang_task._id';
+        $select = 'nickname,headimgurl,instruction,category,status,reward,time_start,time_end,think_bangbang_task._id';
         return $this
+            ->selectRaw($select)
             ->where(array('think_bangbang_task._id' => $taskId))
             ->leftJoin('think_bangbang_user', 'think_bangbang_task.publish_user', '=', 'think_bangbang_user._id')
             ->first();

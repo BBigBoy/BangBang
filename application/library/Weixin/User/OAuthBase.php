@@ -32,6 +32,8 @@ class Weixin_User_OAuthBase extends Weixin_User_OAuth
         if ($userInfo['nickname']) {
             session('headImgUrl', $userInfo['headimgurl']);
             session('nickname', $userInfo['nickname']);
+            cookie('nickname', $userInfo['nick_name']);
+            cookie('headimgurl', $userInfo['headimgurl']);
         }
     }
 
