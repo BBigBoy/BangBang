@@ -258,8 +258,9 @@
             formData.append("comment", comment);
             formData.append("task", $('.msg:eq(0)').attr('taskId'));
             var host = 'http://' + window.location.host;
-            var sendUrl = host + '/index.php/Bang/Main/postcomment?ii=99';
-
+            var sendUrl = host + '/index.php/Bang/Main/postcomment' +
+                    (getUrlParam('ii') ? '?ii=99' : '');
+            alert(getUrlParam('ii') ? '?ii=99' : 'no');
             function sendData(data, url, successFunc) {
                 var XHR = new XMLHttpRequest();
                 // 定义数据成功发送并返回后执行的操作

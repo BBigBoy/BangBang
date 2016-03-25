@@ -10,6 +10,7 @@ class Bang_UserModel extends \Illuminate\Database\Eloquent\Model
 {
     public $timestamps = false;
     protected $table = 'think_bangbang_user';
+    protected $primaryKey = '_id';
 
     function findUser($findInfo)
     {
@@ -18,7 +19,7 @@ class Bang_UserModel extends \Illuminate\Database\Eloquent\Model
 
     function addUser($userInfo)
     {
-        return $this::insert($userInfo);
+        return $this::insertGetId($userInfo);
     }
 
 

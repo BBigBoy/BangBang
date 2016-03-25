@@ -576,25 +576,10 @@ function saveOAuthUserInfo($openId, $authAppId, $oauthAccessToken = '')
     if ($fansInfo) {
         $fansInfo['privilege'] = json_encode($fansInfo['privilege']);
         $fansInfo['get_timestamp'] = time();
-        $whereFans['authorizerappid'] = $authAppId;
-        $whereFans['componentappid'] = WXOpenplatform_APP_ID;
-        $whereFans['openid'] = $openId;
         $fansInfoModel = new Weixin_FansInfoModel(); // 实例化AccountAuthorizerInfo对象
-        $updateState = $fansInfoModel->updateFans($whereFans, $fansInfo);
-        if ($updateState === false) {
-            errorLog('', -3, true);
-            return false;
-        } elseif ($updateState == 0) {
-            $fans = $fansInfoModel->findFans($whereFans);
-            if (!$fans) {
-                $fansInfo['authorizerappid'] = $authAppId;
-                $fansInfo['componentappid'] = WXOpenplatform_APP_ID;
-                $addState = $fansInfoModel->addFans($fansInfo);
-                if ($addState === false) {
-                    errorLog('', -3, true);
-                }
-            }
-        }
+        $fansInfo['authorizerappid'] = $authAppId;
+        $fansInfo['componentappid'] = WXOpenplatform_APP_ID;
+        $fansInfoModel->findOrCreate($fansInfo);
         return $fansInfo;
     }
 }

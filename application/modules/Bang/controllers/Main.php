@@ -14,8 +14,10 @@ class MainController extends Own_Controller_Base
         if (getParam('get.ii')) {
             //测试的时候模拟一个登陆用户
             session('userId', 6);
-            cookie('nickname', 'BigBigBoy');
-            cookie('headimgurl', 'http://wx.qlogo.cn/mmopen/seHTfIrWGf40t7p4lsSvY4WvMYmoZWSiaOZutbia756ORWwyuCmWMZyMYQicyxAhdRPAZWJGiciaibHr9lh5wY4mwxRax4yribGpzzQ/0');
+            if (!session('userName')) {
+                cookie('nickname', 'BigBigBoy');
+                cookie('headimgurl', 'http://wx.qlogo.cn/mmopen/seHTfIrWGf40t7p4lsSvY4WvMYmoZWSiaOZutbia756ORWwyuCmWMZyMYQicyxAhdRPAZWJGiciaibHr9lh5wY4mwxRax4yribGpzzQ/0');
+            }
             return;
         }
         if (!session('nickname')) {
@@ -25,15 +27,20 @@ class MainController extends Own_Controller_Base
             $bangUserModel = new Bang_UserModel();
             $loginUserInfo = $bangUserModel
                 ->findUser(array('openid' => session('openid')));
-            if ($loginUserInfo) {
-                Own_Log::getInstance()->addInfo(session('openid') . " login success");
-                session('userName', $loginUserInfo['name']);
-                session('userId', $loginUserInfo['_id']);
-                session('nickname', $loginUserInfo['nick_name']);
-                cookie('nickname', $loginUserInfo['nick_name']);
-                cookie('headimgurl', $loginUserInfo['headimgurl']);
-                $this->assign('userId', $loginUserInfo['_id']);
+            if (!$loginUserInfo) {
+                $userInfo['headimgurl'] = session('headImgUrl')?:('http://' . $_SERVER['HTTP_HOST'].'/public/bang/image/youke.jpg');
+                $userInfo['nickname'] = session('nickname');
+                $userInfo['join_time'] = time();
+                $userInfo['openid'] = session('openid');
+                $userId = $bangUserModel->addUser($userInfo);
             }
+            Own_Log::getInstance()->addInfo(session('openid') . " login success");
+            session('userName', $loginUserInfo['name'] ?: '');
+            session('userId', $loginUserInfo['_id'] ?: $userId);
+            session('nickname', $loginUserInfo['nick_name'] ?: session('nickname'));
+            cookie('nickname', $loginUserInfo['nick_name'] ?: session('nickname'));
+            cookie('headimgurl', $loginUserInfo['headimgurl'] ?: session('headImgUrl'));
+            $this->assign('userId', session('userId'));
         }
         $jssdk = new Weixin_JS_SDK(C('AUTH_APP_ID'));
         $signPackage = $jssdk->getSignPackage();

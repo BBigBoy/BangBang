@@ -16,6 +16,11 @@ class Weixin_FansInfoModel extends \Illuminate\Database\Eloquent\Model
         return $this::where($whereFans)->select(explode(',', $fields))->get();
     }
 
+    function findOrCreate($fansInfo)
+    {
+    return $this->firstOrCreate($fansInfo);
+    }
+
     function updateFans($whereFans, $fansInfo)
     {
         return $this::update($whereFans, $fansInfo);
