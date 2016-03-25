@@ -3,6 +3,7 @@
     "illuminate/database": "5.2.21",
     "barryvdh/laravel-ide-helper": "dev-master",
     "monolog/monolog": "^1.18",
-    "wazaari/monolog-mysql": ">1.0.0"
+    "wazaari/monolog-mysql": ">1.0.0",
+    "swiftmailer/swiftmailer": "5.4.*@dev"
   }
 }

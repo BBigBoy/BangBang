@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @name IndexController
- * @author root
- * @see http://www.php.net/manual/en/class.yaf-controller-abstract.php
- */
 class IndexController extends Own_Controller_Base
 {
 
@@ -30,9 +25,12 @@ class IndexController extends Own_Controller_Base
             $loginUserInfo = $bangUserModel
                 ->findUser(array('openid' => session('openid')));
             if ($loginUserInfo) {
+                Own_Log::getInstance()->addInfo(session('openid') . " login success");
                 session('userName', $loginUserInfo['name']);
                 session('userId', $loginUserInfo['_id']);
                 session('nickname', $loginUserInfo['nick_name']);
+                cookie('nickname', $loginUserInfo['nick_name']);
+                cookie('headimgurl', $loginUserInfo['headimgurl']);
                 $this->assign('userId', $loginUserInfo['_id']);
             }
         }
