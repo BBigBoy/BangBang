@@ -187,6 +187,7 @@
     }
     function createComment(commentObj) {
         var comment = $(commentCOM.clone());
+        var sonPaddingLeft = '30px';
         comment.css('display', 'block');
         comment.attr('id', 'comment-' + commentObj['_id']);
         comment.find('img').attr('src', commentObj['headimgurl']);
@@ -195,12 +196,23 @@
         comment.find('div.post-time').text(getDateDiff(commentObj['post_time']));
         comment.find('div.reply-btn:eq(0)').on('click', commentInputGetFocus);
         if (commentObj['aim_comment'] != 0) {
-            comment.css('padding-left', '30px');
+            comment.css('padding-left', sonPaddingLeft);
             comment.css('background', '#eee');
             comment.find('div.comment-content').css('font-size', '0.9em');
-            $('#comment-' + commentObj['aim_comment']).after(comment.get());
+            var belowComment = $('#comment-' + commentObj['aim_comment']).next();
+            for (; ;) {
+                if (belowComment.css('padding-left') != sonPaddingLeft) {
+                    belowComment.before(comment.get());
+                    break;
+                }
+                belowComment = belowComment.next();
+            }
         } else {
             commentCOM.before(comment.get());
+        }
+        $('#none-comment').css('display', 'none');
+        if ($('#comment-input').val() != '') {
+            $('body').animate({scrollTop:(comment.offset().top-60+'px')});
         }
     }
     function generateCommentArea(commentArr) {
@@ -283,12 +295,12 @@
                             showTitle: false,
                             content: "评论发布成功",
                             onPositive: function () {
-                                $('#comment-input').attr('parent-comment', 0);
-                                $('#comment-input').val('');
                                 var comment = eval("(" + jsonObj.data + ")");
                                 comment['headimgurl'] = getCookie('headimgurl');
                                 comment['nickname'] = getCookie('nickname');
                                 createComment(comment);
+                                $('#comment-input').attr('parent-comment', 0);
+                                $('#comment-input').val('');
                             }
                         });
                         break;
